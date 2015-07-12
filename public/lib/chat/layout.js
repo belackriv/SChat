@@ -1,0 +1,32 @@
+'use strict';
+
+import Radio from 'backbone.radio';
+import Marionette from 'marionette';
+import layoutTpl from './layout.hbs!';
+import TabsView from './tabs';
+import ChatView from './chat';
+
+
+export default Marionette.LayoutView.extend({
+  initialize(options){
+    Radio.channel('chat').on('activate',this._activateChannel.bind(this));
+  },
+  template: layoutTpl,
+  regions: {
+    tabs: "#chat_tabs_container",
+    users: "#chat_users_container",
+    messages: "#chat_messages_container"
+  },
+  onBeforeShow(){
+    this.showChildView('tabs', new TabsView({
+      collection: this.options.channelCollection
+    }));
+    this.showChildView('messages', new ChatView());
+  },
+  _activateChannel(messageCollection, channelModel){
+    this.showChildView('messages', new ChatView({
+      collection: messageCollection,
+      model: channelModel
+    })); 
+  },
+});

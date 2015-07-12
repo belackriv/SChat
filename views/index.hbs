@@ -1,0 +1,57 @@
+<div id="content">
+	<nav class="navbar navbar-default navbar-fixed-top">
+		<div class="navbar-header">
+		  <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+		    <span class="sr-only">Toggle navigation</span>
+		    <span class="icon-bar"></span>
+		    <span class="icon-bar"></span>
+		    <span class="icon-bar"></span>
+		  </button>
+		  <a class="navbar-brand" href="/">S-Chat</a>
+		</div>
+		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+		   <form class="navbar-form navbar-left schat-navbar-nick-form">
+		    <div class="form-group">
+		      <input type="text" class="form-control" name="nick" placeholder="Nick" >
+		    </div>
+		    <button type="submit" class="btn btn-default schat-navbar-nick-button">Change Nick</button>
+		    <span class="nick error-mesg"></span>
+		  </form>
+		  <p class="navbar-text">
+		    Initializing...
+		  </p>
+		  <button type="button" name="connect" class="btn btn-default navbar-left navbar-btn">Connect</button>
+		  <form class="navbar-form navbar-left schat-navbar-channel-form">
+		    <div class="form-group">
+		      <input type="text" class="form-control" name="channel" placeholder="Channel Name">
+		    </div>
+		    <button type="submit" class="btn btn-default schat-navbar-join-button">Join Channel</button>
+		    <span class="channel error-mesg"></span>
+		  </form>
+		  <ul class="nav navbar-nav navbar-right navbar-form">
+		    <li>
+		      <button type="button" name="volume_toggle" class="btn btn-default">
+		          <span class="glyphicon glyphicon-volume-off"></span>
+		      </button>
+		    </li>
+		  </ul>
+		</div>
+	</nav>
+	<header></header>
+	<section id="main-section">
+		<div class="panel panel-default">
+		  <div class="panel-body">
+			<div class="schat-chat-tabs" id="chat_tabs_container">
+				<ul class="nav nav-pills"></ul>
+			</div>
+			<div class="schat-chat-pane well well-lg">
+				<div class="schat-chat-users" id="chat_users_container"></div>
+				<div class="schat-chat-messages" id="chat_messages_container">
+					<div class="schat-chat-loading">Loading...</div>
+				</div>
+			</div>    
+		  </div>
+		</div>
+	</section>
+	<footer></footer>
+</div>
