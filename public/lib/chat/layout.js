@@ -4,6 +4,7 @@ import Radio from 'backbone.radio';
 import Marionette from 'marionette';
 import layoutTpl from './layout.hbs!';
 import TabsView from './tabs';
+import UsersView from './users';
 import ChatView from './chat';
 
 
@@ -21,12 +22,17 @@ export default Marionette.LayoutView.extend({
     this.showChildView('tabs', new TabsView({
       collection: this.options.channelCollection
     }));
+    this.showChildView('users', new UsersView());
     this.showChildView('messages', new ChatView());
   },
-  _activateChannel(messageCollection, channelModel){
+  _activateChannel(channelModel, usersCollection, messageCollection){
+    this.showChildView('users', new UsersView({
+      collection: usersCollection,
+      model: channelModel
+    }));
     this.showChildView('messages', new ChatView({
       collection: messageCollection,
       model: channelModel
-    })); 
+    }));
   },
 });

@@ -3,6 +3,7 @@
 import Service from 'backbone.service';
 import Backbone from 'backbone';
 import Radio from 'backbone.radio';
+import UserCollection from 'lib/models/userCollection';
 import MessageCollection from 'lib/models/messageCollection';
 import MessageModel from 'lib/models/messageModel';
 
@@ -50,6 +51,9 @@ const MessageService = Service.extend({
         var topicPrefix = messageModel.get('nick')?' * '+messageModel.get('nick')+' set topic to "':' * Topic is "';
         topicChangeMessage.set('content',topicPrefix+messageModel.get('content')+'"');
         this._addMessage(topicChangeMessage);
+        break;
+      case 'RPL_NAMREPLY':
+        Radio.channel('users').trigger('receive',messageModel);
         break;
       default:
         this._addMessage(messageModel);
@@ -100,7 +104,9 @@ const MessageService = Service.extend({
     this._channelMessages = {};
   },
   _activateChannel(channelModel){
-    Radio.channel('chat').trigger('activate',this._getMessageCollection(channelModel.get('name')), channelModel);
+    var userCollection = Radio.channel('users').request('getChannelUsers', channelModel.get('name'));
+    var messageCollection = this._getMessageCollection(channelModel.get('name'));
+    Radio.channel('chat').trigger('activate',channelModel, userCollection, messageCollection);
   },
   _getMessageCollection(channelName){
     return this._channelMessages[channelName.toLowerCase()];

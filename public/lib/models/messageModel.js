@@ -284,6 +284,7 @@ export default Backbone.Model.extend({
     timestamp: null,
     parsedMessage: null
 	},
+  //this takes a /command from the input and tries to turn it into a raw command and then parse that raw command.
   createCommand(command, content){
     var raw = null;
     switch(command.toUpperCase()){
@@ -503,6 +504,8 @@ export default Backbone.Model.extend({
       case 'RPL_TOPIC':
       case 'RPL_NOTOPIC':
         return message.params[1];
+      case 'RPL_NAMREPLY':
+        return message.params[2];
       default:
         return 'server';
     }
@@ -518,6 +521,8 @@ export default Backbone.Model.extend({
       case 'RPL_TOPIC':
       case 'RPL_NOTOPIC':
         return message.params[2];
+      case 'RPL_NAMREPLY':
+        return message.params[3];  
       default:
         return message.command +' : '+ message.params.join(' ');
         
@@ -530,6 +535,7 @@ export default Backbone.Model.extend({
       return '';
     }
   },
+  //generates a raw command to send from the model properties
   toString(){
     switch(this.get('command')){
       case 'JOIN':

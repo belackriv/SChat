@@ -9,5 +9,6 @@ export default Backbone.Model.extend({
     active: null,
     stale: null,
     alerted: false
-	}
+	},
+  idAttribute: 'name'
 });

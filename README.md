@@ -1,1 +1,1 @@
-An IRC Websocket client
+An IRC Websocket client.
