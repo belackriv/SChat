@@ -43,6 +43,20 @@ const MessageService = Service.extend({
         Radio.channel('socket').trigger('send',reply);
         this._addMessage(reply);
         break;
+      case 'JOIN':
+        Radio.channel('users').trigger('join',messageModel);
+        messageModel.set('content', ' * '+messageModel.get('nick')+' has joined the channel.');
+        if(messageModel.get('nick') != Radio.channel('users').request('getNick')){
+          this._addMessage(messageModel);  
+        }
+        break;
+      case 'PART':
+        Radio.channel('users').trigger('part',messageModel);
+        messageModel.set('content', ' * '+messageModel.get('nick')+' has left the channel('+messageModel.get('content')+').');
+        if(messageModel.get('nick') != Radio.channel('users').request('getNick')){
+          this._addMessage(messageModel);  
+        }
+        break;  
       case 'RPL_TOPIC':
       case 'RPL_NOTOPIC':
       case 'TOPIC':
@@ -66,18 +80,14 @@ const MessageService = Service.extend({
   _addMessage(messageModel){
     var channelName = messageModel.get('channel');
     var channelCollection = this._getMessageCollection(channelName);
-    if(channelCollection){
-      channelCollection.add(messageModel);
-      if(channelCollection.length > MessageBufferSize){
-        channelCollection.shift();
-      }
+    channelCollection.add(messageModel);
+    if(channelCollection.length > MessageBufferSize){
+      channelCollection.shift();
     }
   },
   _addChannel(channelModel){
     var channelName = channelModel.get('name');
-    if(!this._getMessageCollection(channelName)){
-      this._channelMessages[channelName] = new MessageCollection();
-    }
+    var messageCollection = this._getMessageCollection(channelName);
     var messageModel = new MessageModel({
       channel: channelName,
       command: 'JOIN'
@@ -93,7 +103,7 @@ const MessageService = Service.extend({
   },
   _removeChannel(channelModel){
     var channelName = channelModel.get('name');
-     var messageModel = new MessageModel({
+    var messageModel = new MessageModel({
       channel: channelName,
       command: 'PART'
     });
@@ -104,12 +114,16 @@ const MessageService = Service.extend({
     this._channelMessages = {};
   },
   _activateChannel(channelModel){
-    var userCollection = Radio.channel('users').request('getChannelUsers', channelModel.get('name'));
-    var messageCollection = this._getMessageCollection(channelModel.get('name'));
+    var channelName =  channelModel.get('name');
+    var userCollection = Radio.channel('users').request('getChannelUsers', channelName);
+    var messageCollection = this._getMessageCollection(channelName);
     Radio.channel('chat').trigger('activate',channelModel, userCollection, messageCollection);
   },
   _getMessageCollection(channelName){
-    return this._channelMessages[channelName.toLowerCase()];
+    if(!Object.prototype.hasOwnProperty.call(this._channelMessages, channelName)){
+      this._channelMessages[channelName] = new MessageCollection();
+    }
+    return this._channelMessages[channelName];
   },
   _channelMessages:{}
 });

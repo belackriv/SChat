@@ -491,7 +491,7 @@ export default Backbone.Model.extend({
     if(typeof commandNumToStrLookup[message.command] !== 'undefined'){
       command = commandNumToStrLookup[message.command].toUpperCase();
     }
-    return command;
+    return command.replace(/(\r\n|\n|\r)/gm,"");
   },
   _parseChannel(message){
     switch(this.get('command')){
@@ -500,12 +500,12 @@ export default Backbone.Model.extend({
       case 'QUIT':
       case 'PRIVMSG':
       case 'TOPIC':
-        return message.params[0];
+        return message.params[0].replace(/(\r\n|\n|\r)/gm,"");
       case 'RPL_TOPIC':
       case 'RPL_NOTOPIC':
-        return message.params[1];
+        return message.params[1].replace(/(\r\n|\n|\r)/gm,"");
       case 'RPL_NAMREPLY':
-        return message.params[2];
+        return message.params[2].replace(/(\r\n|\n|\r)/gm,"");;
       default:
         return 'server';
     }
@@ -530,7 +530,7 @@ export default Backbone.Model.extend({
   },
   _parseNick(message){
     if(message.parsed){
-      return message.parsed.nick
+      return message.parsed.nick;
     }else{
       return '';
     }

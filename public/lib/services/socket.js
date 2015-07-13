@@ -39,6 +39,7 @@ socketChannel.on('connect', function(options){
 
 console.log('message command: '+messageModel.get('command'));
 console.log(message);
+console.log(event.data);
     });
   } else {
       //show "No socket" invalid message

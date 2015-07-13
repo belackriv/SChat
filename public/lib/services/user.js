@@ -14,19 +14,38 @@ const UserService = Service.extend({
     this.nick = "Guest_"+ Math.floor(Math.random() * 1001);
     Radio.channel('users').on('changeNick',this._changeNick.bind(this));
     Radio.channel('users').on('receive',this._receive.bind(this));
+    Radio.channel('users').on('join',this._join.bind(this));
+    Radio.channel('users').on('part',this._part.bind(this));
     Radio.channel('users').reply('getNick', this.nick);
     Radio.channel('users').reply('getChannelUsers', this._getUserCollection.bind(this));
   },
   _receive(messageModel){
-    if(!this._getUserCollection(messageModel.get('channel'))){
-      this._channelUsers[messageModel.get('channel')] = new UserCollection();
-    }
+    var channelName = messageModel.get('channel');
+    var userCollection = this._getUserCollection(channelName);
     var userArray = messageModel.get('content').split(' ');
     userArray.forEach(userStr=>{
       var userModel =  new UserModel({raw:userStr});
       userModel.parse();
-      this._channelUsers[messageModel.get('channel')].add(userModel);
+      if(! userCollection.get(userModel.get('nick')) ){
+        userCollection.add(userModel);  
+      }
     });
+  },
+  _join(messageModel){
+    var channelName = messageModel.get('channel');
+    var userCollection = this._getUserCollection(channelName);
+    var userModel =  new UserModel({nick:messageModel.get('nick')});
+    if(! userCollection.get(messageModel.get('nick')) ){
+      userCollection.add(userModel);  
+    }
+  },
+  _part(messageModel){
+    var channelName = messageModel.get('channel');
+    var userCollection = this._getUserCollection(channelName);
+    var userModel = userCollection.get(messageModel.get('nick'));
+    if(userModel){
+      userCollection.remove(userModel);
+    }
   },
   _changeNick(nick){
     this.nick = nick;
@@ -38,14 +57,10 @@ const UserService = Service.extend({
     Radio.channel('messages').trigger('send', messageModel);
   },
   _getUserCollection(channelName){
-    if(typeof channelName === 'string'){
-      if(!this._channelUsers[channelName.toLowerCase()]){
-        this._channelUsers[channelName.toLowerCase()] = new UserCollection();
-      }
-      return this._channelUsers[channelName.toLowerCase()];
-    }else{
-      return null;
+    if(!Object.prototype.hasOwnProperty.call(this._channelUsers, channelName)){
+      this._channelUsers[channelName] = new UserCollection();
     }
+    return this._channelUsers[channelName];
   },
   _channelUsers:{}
 });
