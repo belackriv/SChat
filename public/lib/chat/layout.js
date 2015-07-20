@@ -12,6 +12,7 @@ export default Marionette.LayoutView.extend({
   initialize(options){
     Radio.channel('chat').on('activate',this._activateChannel.bind(this));
   },
+  className: 'schat-chat-layout-container',
   template: layoutTpl,
   regions: {
     tabs: "#chat_tabs_container",

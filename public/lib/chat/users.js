@@ -8,6 +8,7 @@ import Radio from 'backbone.radio';
 
 var UserChildView = Marionette.ItemView.extend({
   template: userTemplate,
+  className: 'list-group-item schat-user-item',
   tagName: 'li',
   events:  {
     'click' : '_handleClick'
@@ -16,10 +17,15 @@ var UserChildView = Marionette.ItemView.extend({
     'change': 'render'
   },
   onRender(){
-
+    if(this.model.get('isActive')){
+      this.$el.addClass('active');
+    }else{
+      this.$el.removeClass('active');
+    }
   },
   _handleClick(event){
-
+    this.model.set('isActive', true);
+    this.triggerMethod('activate');
   }
 });
 
@@ -28,5 +34,12 @@ var UserChildView = Marionette.ItemView.extend({
 export default Marionette.CompositeView.extend({
   childView: UserChildView,
   template: usersTemplate,
-  childViewContainer: 'ul'
+  childViewContainer: 'ul',
+  onChildviewActivate(childView){
+    this.collection.each((model)=>{
+      if(model != childView.model){
+        model.set('isActive', false);
+      }
+    });
+  }
 });

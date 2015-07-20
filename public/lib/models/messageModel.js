@@ -540,23 +540,25 @@ export default Backbone.Model.extend({
     switch(this.get('command')){
       case 'JOIN':
         return 'JOIN '+this.get('channel');
+      case 'NICK':
+        return 'NICK '+this.get('nick');
       case 'PART':
         return 'PART '+this.get('channel');
-      case 'QUIT':
-        return 'QUIT';
+      case 'PONG':
+        return 'PONG '+this.get('extra');        
       case 'PRIVMSG':
         return "PRIVMSG "+this.get('channel')+' :'+this.get('content');
         break;
+      case 'QUIT':
+        return 'QUIT';
       case 'USER':
         return 'USER '+this.get('extra');
-      case 'NICK':
-        return 'NICK '+this.get('nick');
-      case 'PONG':
-        return 'PONG '+this.get('extra');
+      case 'RAW':
+        return this.get('content');     
       case 'TOPIC':
         return 'TOPIC '+this.get('channel')+' :'+this.get('content');
-      case 'RAW':
-        return this.get('content');
+      case 'WHOIS':
+        return 'WHOIS '+this.get('extra');
       default:
         return '';
         break;

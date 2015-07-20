@@ -24,6 +24,7 @@ var ChatMsgView = Marionette.ItemView.extend({
 export default Marionette.CompositeView.extend({
   childView: ChatMsgView,
   template: chatTemplate,
+  className: 'schat-chat-container',
   childViewContainer: '.schat-messages-container',
   ui: {
     contentInput: 'input[name=content]',

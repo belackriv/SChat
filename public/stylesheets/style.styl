@@ -1,19 +1,42 @@
 #main-section
-  padding-top: 75px
+  position: absolute;
+  top: 75px
+  bottom: 75px
+  left: 25px
+  margin: auto
+  right: 25px
+.schat-chat-layout-container,
+.schat-chat-panel
+    height: 100%
 a.schat-chat-tab-anchor
-  cursor: pointer
+    cursor: pointer
 .schat-chat-tab-name
-  margin: 3px  
+    margin: 3px  
 .schat-chat-well
-  display: flex
-  width: 100%
-  bottom: 0
-  top: 75
+    display: flex
+    height: calc(100% - 45px)
+.schat-chat-container    
+    display: flex
+    flex-direction: column
+    justify-content: space-between
+    height: 100%
+.schat-chat-container > div
+    flex: 0
 .schat-chat-messages
-  width: calc(100% - 300px)
+    width: 100%
+    height: 100%
+.schat-chat-divider
+    width: 10px    
 .schat-chat-users
-  width: 300px
+    width: 300px
 .schat-chat-loading
-  text-align: center
-  font-weight: bold
-  font-size: 24px
+    text-align: center
+    font-weight: bold
+    font-size: 24px
+div.schat-status-bar-container
+    flex-basis: auto;
+    height: 22px;    
+div.schat-messages-container
+    overflow-y: scroll
+    flex: 1
+

@@ -9,7 +9,6 @@ import UserModel from 'lib/models/userModel';
 
 
 const UserService = Service.extend({
-  //channelName: 'users',
   start(){
     this.nick = "Guest_"+ Math.floor(Math.random() * 1001);
     Radio.channel('users').on('changeNick',this._changeNick.bind(this));

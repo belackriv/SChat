@@ -26,6 +26,7 @@ System.config({
     "backbone.service": "github:thejameskyle/backbone.service@0.5.1",
     "backbone.wreqr": "github:marionettejs/backbone.wreqr@1.3.3",
     "bootstrap": "github:twbs/bootstrap@3.3.5",
+    "bootstrap-contextmenu": "github:sydcanem/bootstrap-contextmenu@0.3.3",
     "core-js": "npm:core-js@0.9.18",
     "css": "github:systemjs/plugin-css@0.1.13",
     "es6-promise": "npm:es6-promise-polyfill@1.0.0",
