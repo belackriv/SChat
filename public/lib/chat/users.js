@@ -9,7 +9,6 @@ import Radio from 'backbone.radio';
 
 
 var ContextMenuRegion = Marionette.Region.extend({
-	//el: '#context_menu',
 	onBeforeShow(){
 		var test;
 	},
@@ -35,7 +34,8 @@ var UserChildView = Marionette.ItemView.extend({
 	},
 	events:  {
 		'keydown' : '_handleKeydown',
-		'mousedown': '_handleClick'
+		'click': '_handleClick',
+		'contextmenu': '_handleContextMenu'
 	},
 	modelEvents: {
 		'change': 'render'
@@ -48,20 +48,18 @@ var UserChildView = Marionette.ItemView.extend({
 		}
 	},
 	_handleClick(event){
-		event.preventDefault();
-		event.stopImmediatePropagation();
-		if(event.button == 0){
-			this.model.set('isActive', true);
-			this.triggerMethod('activate');
-		}else if(event.button == 2){
-			this.triggerMethod('show:menu');
-		}
+		this.model.set('isActive', true);
+		this.triggerMethod('activate');
 	},
 	_handleKeydown(event){
 		if(event.which == 27){
 			var closeMEnu;
 		}
 	},
+	_handleContextMenu(event){
+		event.preventDefault();
+		this.triggerMethod('show:menu');
+	}
 });
 
 var UserCollectionView = Marionette.CollectionView.extend({

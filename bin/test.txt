@@ -1,1 +1,1 @@
-:user2 JOIN #test
+:user3 JOIN #test

@@ -3,7 +3,6 @@
 import 'backbone';
 import 'jquery';
 import 'bootstrap';
-import 'bootstrap-contextmenu';
 import App from './app';
 import socketService from './services/socket';
 import channelService from './services/channel';
