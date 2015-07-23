@@ -1,7 +1,54 @@
-body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+#main-section {
+  position: absolute;
+  top: 75px;
+  bottom: 75px;
+  left: 25px;
+  margin: auto;
+  right: 25px;
 }
-a {
-  color: #00b7ff;
+.schat-chat-layout-container,
+.schat-chat-panel {
+  height: 100%;
+}
+a.schat-chat-tab-anchor {
+  cursor: pointer;
+}
+.schat-chat-tab-name {
+  margin: 3px;
+}
+.schat-chat-well {
+  display: flex;
+  height: calc(100% - 45px);
+}
+.schat-chat-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+.schat-chat-container > div {
+  flex: 0;
+}
+.schat-chat-messages {
+  width: 100%;
+  height: 100%;
+}
+.schat-chat-divider {
+  width: 10px;
+}
+.schat-chat-users {
+  width: 300px;
+}
+.schat-chat-loading {
+  text-align: center;
+  font-weight: bold;
+  font-size: 24px;
+}
+div.schat-status-bar-container {
+  flex-basis: auto;
+  height: 22px;
+}
+div.schat-messages-container {
+  overflow-y: scroll;
+  flex: 1;
 }

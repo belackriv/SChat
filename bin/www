@@ -20,7 +20,7 @@ app.set('port', port);
  */
 
 var server = http.createServer(app);
-var io = require('socket.io')(server);
+//var io = require('socket.io')(server);
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -33,10 +33,35 @@ server.on('listening', onListening);
 /**
  * Listen for web sockets.
  */
+var util = require('util');
+var fs = require('fs');
+var ws = require('nodejs-websocket');
+var wsServer = ws.createServer(function(conn){
+  fs.watch('./bin/test.txt', function(event){
+    fs.readFile('./bin/test.txt',{encodding: 'utf8'}, function(err, data){
+      console.log("File Changed:"+event);
+      if(conn){
+        conn.sendText(data.toString());
+        console.log("WS Sent "+data.toString());  
+      }
+    });
+  });
 
+  conn.on("text", function(str){
+    console.log("WS Received "+str);
+  });
+
+  conn.on('closed', function(code, reason){
+    console.log("WS Connection Closed");
+  });
+}).listen(8080);
+
+  
+/*
 io.on('connection', function (socket) {
   app.socketHandler.connect(socket);
 });
+*/
 
 /**
  * Normalize a port into a number, string, or false.

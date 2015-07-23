@@ -9,7 +9,8 @@ import ChannelModel from 'lib/models/channelModel';
 const ChannelService = Service.extend({
   setup(options = {}) {
     this.collection = new ChannelCollection();
-    this.server = "ws://dazed.ef.net:8080/ws";
+    //this.server = "ws://dazed.ef.net:8080/ws";
+    this.server = "ws://localhost:8080";
   },
   start(){
     Radio.channel('channels').on('change:topic',this._changeTopic.bind(this));
