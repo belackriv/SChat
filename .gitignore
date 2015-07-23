@@ -30,7 +30,7 @@ node_modules
 npm-debug.log
 
 # jspm modules
-public/jspm_modules/*
+public/jspm_packages
 
 # ST Project Files
 *.sublime-project
