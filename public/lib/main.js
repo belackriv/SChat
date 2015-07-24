@@ -2,6 +2,7 @@
 
 import 'backbone';
 import 'jquery';
+import 'jquery-ui';
 import 'bootstrap';
 import App from './app';
 import socketService from './services/socket';

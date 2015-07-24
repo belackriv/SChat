@@ -9,9 +9,39 @@ import Radio from 'backbone.radio';
 
 
 var ContextMenuRegion = Marionette.Region.extend({
-	onBeforeShow(){
-		var test;
+	onBeforeShow(view, region, options){
+		region.$el.position({
+			my: "left+3 bottom-3",
+			of: options.event,
+			collision: "fit"
+		});
+		region.open(view);
+		$('body').on('click contextmenu', function(event){
+			if(event.target != view.el && view.$el.has(event.target).length == 0){
+				region.close(view);
+			}
+			if(event.type == 'contextmenu'){
+				if(event.target == view.el || view.$el.has(event.target).length){
+					event.preventDefault();
+					event.stopPropagation();
+				}
+			}
+		});
 	},
+	open(view){
+		if(view){
+			view.$el.css('display','block');
+		}else if(this.currentView){
+			this.currentView.$el.css('display','block');
+		}
+	},
+	close(view){
+		if(view){
+			view.$el.css('display','none');
+		}else if(this.currentView){
+			this.currentView.$el.css('display','none');
+		}
+	}
 });
 
 var UserContextMenuItem = Marionette.ItemView.extend({
@@ -22,18 +52,14 @@ var UserContextMenuItem = Marionette.ItemView.extend({
 var UserContextMenu = Marionette.CollectionView.extend({
 	childView: UserContextMenuItem,
 	tagName: 'ul',
-	className: 'dropdown-men'
+	className: 'dropdown-menu'
 });
 
 var UserChildView = Marionette.ItemView.extend({
 	template: userTemplate,
 	className: 'list-group-item schat-user-item',
 	tagName: 'li',
-	ui: {
-		"clickable": '.clickable'
-	},
 	events:  {
-		'keydown' : '_handleKeydown',
 		'click': '_handleClick',
 		'contextmenu': '_handleContextMenu'
 	},
@@ -51,14 +77,10 @@ var UserChildView = Marionette.ItemView.extend({
 		this.model.set('isActive', true);
 		this.triggerMethod('activate');
 	},
-	_handleKeydown(event){
-		if(event.which == 27){
-			var closeMEnu;
-		}
-	},
 	_handleContextMenu(event){
 		event.preventDefault();
-		this.triggerMethod('show:menu');
+		event.stopPropagation();
+		this.triggerMethod('show:menu', event);
 	}
 });
 
@@ -73,7 +95,10 @@ export default Marionette.LayoutView.extend({
 	childViewContainer: 'ul',
 	regions:{
 		'list': '#user_list_container',
-		'menu': '#user_context_menu'
+		'menu': {
+			selector: '#user_context_menu',
+			regionClass: ContextMenuRegion
+		}
 	},
 	onBeforeShow(){
 		this.showChildView('list', new UserCollectionView({
@@ -87,9 +112,12 @@ export default Marionette.LayoutView.extend({
 			}
 		});
 	},
-	onChildviewShowMenu(childView){
-		this.showChildView('menu', new UserContextMenu({
+	onChildviewShowMenu(childView, event){
+		this.getRegion('menu').show(new UserContextMenu({
 			collection: new Backbone.Collection([{name:childView.model.get('nick')}])
-		}));
-	}
+		}),
+		{
+			event: event
+		});
+	}	
 });
