@@ -21,6 +21,7 @@ const ChannelService = Service.extend({
     Radio.channel('channels').on('part',this._partChannel.bind(this));
     Radio.channel('channels').reply('isConnected', false);
     Radio.channel('channels').reply('getServerName', this.server);
+    Radio.channel('channels').reply('getActiveChannelName', 'server');
   },
   _connect(callback){
     if(!this._connected){

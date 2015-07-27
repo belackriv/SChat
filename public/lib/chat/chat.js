@@ -16,7 +16,10 @@ var ChatMsgView = Marionette.ItemView.extend({
       default:
         return chatDefaultmsgTemplate;
     }
-  }
+  },
+  onAttach(){
+    this.el.scrollIntoView();
+  },
 });
 
 

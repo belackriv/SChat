@@ -34,6 +34,7 @@ System.config({
     "jquery": "github:components/jquery@2.1.4",
     "jquery-ui": "github:components/jqueryui@1.11.4",
     "marionette": "github:marionettejs/backbone.marionette@2.4.2",
+    "moment": "github:moment/moment@2.10.5",
     "underscore": "npm:underscore@1.8.3",
     "github:components/jqueryui@1.11.4": {
       "jquery": "github:components/jquery@2.1.4"

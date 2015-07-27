@@ -11,10 +11,11 @@ import UserModel from 'lib/models/userModel';
 const UserService = Service.extend({
   start(){
     this.nick = "Guest_"+ Math.floor(Math.random() * 1001);
-    Radio.channel('users').on('changeNick',this._changeNick.bind(this));
     Radio.channel('users').on('receive',this._receive.bind(this));
     Radio.channel('users').on('join',this._join.bind(this));
     Radio.channel('users').on('part',this._part.bind(this));
+    Radio.channel('users').on('changeNick',this._changeNick.bind(this));
+    Radio.channel('users').on('whois',this._whois.bind(this));
     Radio.channel('users').reply('getNick', this.nick);
     Radio.channel('users').reply('getChannelUsers', this._getUserCollection.bind(this));
   },
@@ -52,6 +53,13 @@ const UserService = Service.extend({
     var messageModel = new MessageModel({
       nick: nick,
       command: 'NICK'
+    });
+    Radio.channel('messages').trigger('send', messageModel);
+  },
+  _whois(nick){
+    var messageModel = new MessageModel({
+      extra: nick,
+      command: 'WHOIS'
     });
     Radio.channel('messages').trigger('send', messageModel);
   },

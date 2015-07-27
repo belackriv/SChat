@@ -1,6 +1,7 @@
 'use strict';
 
 import Backbone from 'backbone';
+import Moment from 'moment';
 
 const commandNumToStrLookup = {
   '001':'RPL_WELCOME',
@@ -522,7 +523,23 @@ export default Backbone.Model.extend({
       case 'RPL_NOTOPIC':
         return message.params[2];
       case 'RPL_NAMREPLY':
-        return message.params[3];  
+        return message.params[3];
+      case 'RPL_WHOISUSER':
+        var content = message.params[1]+' is '+message.params[2]+'@';
+        if(message.params[3] != '*'){
+          content += message.params[3];
+        }
+        content += ' ('+message.params.slice(-1)[0]+')';
+        return content;
+      case 'RPL_WHOISSERVER':
+        return  message.params[1]+' using '+message.params[2]+' '+message.params[3];
+      case 'RPL_WHOISOPERATOR':
+      case 'RPL_WHOISIDLE':
+        var idleTimeStr = moment.duration(parseInt(message.params[2]), 'seconds').humanize();
+        var signonTimeStr = moment(parseInt(message.params[3])*1000).format("dddd, MMMM Do YYYY, h:mm:ss a");
+        return message.params[1]+' has been idle '+idleTimeStr+', signed on at '+signonTimeStr;
+      case 'RPL_WHOISCHANNELS':
+        return  message.params[1]+' on '+message.params[2];
       default:
         return message.command +' : '+ message.params.join(' ');
         

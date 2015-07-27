@@ -7,7 +7,8 @@ export default Backbone.Model.extend({
     raw: null,
 		name: null,
 		nick: null,
-    role: null
+    role: null,
+    whois: null
 	},
   idAttribute: 'nick',
   parse(){

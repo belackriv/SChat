@@ -69,6 +69,14 @@ const MessageService = Service.extend({
       case 'RPL_NAMREPLY':
         Radio.channel('users').trigger('receive',messageModel);
         break;
+      case 'RPL_WHOISUSER':
+      case 'RPL_WHOISSERVER':
+      case 'RPL_WHOISOPERATOR':
+      case 'RPL_WHOISIDLE':
+      case 'RPL_WHOISCHANNELS':
+        messageModel.set('channel', Radio.channel('channels').request('getActiveChannelName') );
+        this._addMessage(messageModel);
+        break;
       default:
         this._addMessage(messageModel);
         break;

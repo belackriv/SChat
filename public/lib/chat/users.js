@@ -5,6 +5,7 @@ import Marionette from 'marionette';
 import usersTemplate from './users.hbs!';
 import userTemplate from './user.hbs!';
 import userContextMenuItemTemplate from './userContextMenuItem.hbs!';
+import userCommands from './userCommands';
 import Radio from 'backbone.radio';
 
 
@@ -47,12 +48,20 @@ var ContextMenuRegion = Marionette.Region.extend({
 var UserContextMenuItem = Marionette.ItemView.extend({
 	template: userContextMenuItemTemplate,
 	tagName: 'li',
+	className: 'cursor-pointer',
+	triggers: {
+		'click': 'run:command'
+	}
 });
 
 var UserContextMenu = Marionette.CollectionView.extend({
 	childView: UserContextMenuItem,
 	tagName: 'ul',
-	className: 'dropdown-menu'
+	className: 'dropdown-menu',
+	onChildviewRunCommand(childView){
+		var eventName = childView.model.get('command').toLowerCase();
+		Radio.channel('users').trigger(eventName, this.options.nick);
+	}
 });
 
 var UserChildView = Marionette.ItemView.extend({
@@ -114,7 +123,8 @@ export default Marionette.LayoutView.extend({
 	},
 	onChildviewShowMenu(childView, event){
 		this.getRegion('menu').show(new UserContextMenu({
-			collection: new Backbone.Collection([{name:childView.model.get('nick')}])
+			collection: userCommands,
+			nick: childView.model.get('nick')
 		}),
 		{
 			event: event

@@ -4,7 +4,7 @@ import Backbone from 'backbone';
 
 export default Backbone.Model.extend({
 	defaults:{
-		name: null,
+		command: null,
 	},
-  idAttribute: 'name'
+  idAttribute: 'command'
 });

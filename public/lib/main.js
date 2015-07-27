@@ -4,6 +4,7 @@ import 'backbone';
 import 'jquery';
 import 'jquery-ui';
 import 'bootstrap';
+import './handlebarsHelpers';
 import App from './app';
 import socketService from './services/socket';
 import channelService from './services/channel';
