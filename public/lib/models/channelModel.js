@@ -8,7 +8,8 @@ export default Backbone.Model.extend({
 		topic: null,
     active: null,
     stale: null,
-    alerted: false
+    alerted: false,
+    userCount: 0
 	},
   idAttribute: 'name'
 });

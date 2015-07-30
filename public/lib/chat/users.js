@@ -5,7 +5,7 @@ import Marionette from 'marionette';
 import usersTemplate from './users.hbs!';
 import userTemplate from './user.hbs!';
 import userContextMenuItemTemplate from './userContextMenuItem.hbs!';
-import userCommands from './userCommands';
+import modes from 'lib/models/modes';
 import Radio from 'backbone.radio';
 
 
@@ -18,6 +18,7 @@ var ContextMenuRegion = Marionette.Region.extend({
 		});
 		region.open(view);
 		$('body').on('click contextmenu', function(event){
+			/*
 			if(event.target != view.el && view.$el.has(event.target).length == 0){
 				region.close(view);
 			}
@@ -26,7 +27,8 @@ var ContextMenuRegion = Marionette.Region.extend({
 					event.preventDefault();
 					event.stopPropagation();
 				}
-			}
+			}*/
+			region.close(view);
 		});
 	},
 	open(view){
@@ -48,7 +50,14 @@ var ContextMenuRegion = Marionette.Region.extend({
 var UserContextMenuItem = Marionette.ItemView.extend({
 	template: userContextMenuItemTemplate,
 	tagName: 'li',
-	className: 'cursor-pointer',
+	className(){
+		var className = 'cursor-pointer';
+		var myUserModel = Radio.channel('users').request('getMyUserModelForChannel', this.options.channelModel.get('name') );
+		if(myUserModel == null || this.model.get('roles').indexOf(myUserModel.get('roleName')) == -1){
+			className += ' disabled';
+		}
+		return className;
+	},
 	triggers: {
 		'click': 'run:command'
 	}
@@ -58,15 +67,21 @@ var UserContextMenu = Marionette.CollectionView.extend({
 	childView: UserContextMenuItem,
 	tagName: 'ul',
 	className: 'dropdown-menu',
+	childViewOptions(){
+		return {
+			userModel: this.options.userModel,
+			channelModel: this.options.channelModel
+		};
+	},
 	onChildviewRunCommand(childView){
-		var eventName = childView.model.get('command').toLowerCase();
-		Radio.channel('users').trigger(eventName, this.options.nick);
+		var eventName = childView.model.get('eventName').toLowerCase();
+		Radio.channel('users').trigger(eventName, this.options.userModel, this.options.channelModel);
 	}
 });
 
 var UserChildView = Marionette.ItemView.extend({
 	template: userTemplate,
-	className: 'list-group-item schat-user-item',
+	className:'list-group-item schat-user-item',
 	tagName: 'li',
 	events:  {
 		'click': '_handleClick',
@@ -76,10 +91,21 @@ var UserChildView = Marionette.ItemView.extend({
 		'change': 'render'
 	},
 	onRender(){
+		this._renderUserActive();
+		this._renderUserRoleBackground();
+	},
+	_renderUserActive(){
 		if(this.model.get('isActive')){
 			this.$el.addClass('active');
 		}else{
 			this.$el.removeClass('active');
+		}
+	},
+	_renderUserRoleBackground(){
+		this.$el.removeClass(' schat-user-role-op');
+		this.$el.removeClass(' schat-user-role-voice');
+		if(this.model.get('roleName')){
+			this.$el.addClass(' schat-user-role-'+this.model.get('roleName'));
 		}
 	},
 	_handleClick(event){
@@ -89,6 +115,7 @@ var UserChildView = Marionette.ItemView.extend({
 	_handleContextMenu(event){
 		event.preventDefault();
 		event.stopPropagation();
+		this._handleClick();
 		this.triggerMethod('show:menu', event);
 	}
 });
@@ -96,12 +123,24 @@ var UserChildView = Marionette.ItemView.extend({
 var UserCollectionView = Marionette.CollectionView.extend({
 	tagName: 'ul',
 	className: 'list-group',
-	childView: UserChildView
+	childView: UserChildView,
+	onAddChild(childView){
+    this.triggerMethod('add:user');
+  },
+  onRemoveChild(childView){
+    this.triggerMethod('remove:user');
+  }
 });
 
 export default Marionette.LayoutView.extend({
 	template: usersTemplate,
 	childViewContainer: 'ul',
+	modelEvents: {
+		'change:userCount': '_renderUserCount'
+	},
+	ui:{
+		userCountBadge: '.schat-user-count.badge'
+	},
 	regions:{
 		'list': '#user_list_container',
 		'menu': {
@@ -110,6 +149,9 @@ export default Marionette.LayoutView.extend({
 		}
 	},
 	onBeforeShow(){
+		if(this.model){
+			this.model.set('userCount', this.collection.length);
+		}
 		this.showChildView('list', new UserCollectionView({
 			collection: this.collection
 		}));
@@ -123,11 +165,23 @@ export default Marionette.LayoutView.extend({
 	},
 	onChildviewShowMenu(childView, event){
 		this.getRegion('menu').show(new UserContextMenu({
-			collection: userCommands,
-			nick: childView.model.get('nick')
+			collection: modes,
+			userModel: childView.model,
+			channelModel: this.model
 		}),
 		{
 			event: event
 		});
-	}	
+	},
+	onChildviewAddUser(childView){
+		this.model.set('userCount', this.model.get('userCount')+1);
+	},
+	onChildviewRemoveUser(childView){
+		this.model.set('userCount', this.model.get('userCount')-1);
+	},
+	_renderUserCount(){
+		if(this.ui.userCountBadge instanceof $){
+			this.ui.userCountBadge.text( this.model.get('userCount') );
+		}
+	}
 });

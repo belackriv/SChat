@@ -306,9 +306,9 @@ export default Backbone.Model.extend({
     //these must be done in this order.
     this.set('type', 'TYPE_'+message.command);
     this.set('command', this._parseCommand(message) );
+    this.set('nick', this._parseNick(message) );
     this.set('channel', this._parseChannel(message) );
     this.set('content', this._parseContent(message) );
-    this.set('nick', this._parseNick(message) );
     this.set('timestamp', new Date());
     this.set('parsedMessage', message);
     return message;
@@ -494,19 +494,30 @@ export default Backbone.Model.extend({
     }
     return command.replace(/(\r\n|\n|\r)/gm,"");
   },
+  _parseNick(message){
+    if(message.parsed && typeof message.parsed.nick === 'string'){
+      return message.parsed.nick.replace(/(\r\n|\n|\r)/gm,"");
+    }else{
+      return '';
+    }
+  },
   _parseChannel(message){
     switch(this.get('command')){
       case 'JOIN':
       case 'PART':
-      case 'QUIT':
       case 'PRIVMSG':
       case 'TOPIC':
+      case 'MODE':
+      case 'KICK':
         return message.params[0].replace(/(\r\n|\n|\r)/gm,"");
+      case 'QUIT':
+      case 'NICK':
+        return null;
       case 'RPL_TOPIC':
       case 'RPL_NOTOPIC':
         return message.params[1].replace(/(\r\n|\n|\r)/gm,"");
       case 'RPL_NAMREPLY':
-        return message.params[2].replace(/(\r\n|\n|\r)/gm,"");;
+        return message.params[2].replace(/(\r\n|\n|\r)/gm,"");  
       default:
         return 'server';
     }
@@ -514,11 +525,33 @@ export default Backbone.Model.extend({
   _parseContent(message){
     switch(this.get('command')){
       case 'JOIN':
+        return ' * '+this.get('nick')+' has joined '+this.get('channel');
       case 'PART':
-      case 'QUIT':
+        return ' * '+this.get('nick')+' has left '+this.get('channel');
       case 'PRIVMSG':
       case 'TOPIC':
         return message.params[1];
+      case 'QUIT':
+        return ' * '+this.get('nick')+' has quit('+message.params[0].replace(/(\r\n|\n|\r)/gm,"")+').';
+      case 'MODE':
+        this.set('mode', message.params[1].replace(/(\r\n|\n|\r)/gm,"") );
+        // channel or user mode?
+        if(message.params.length > 2){
+          this.set('extra', message.params[1].replace(/(\r\n|\n|\r)/gm,"")+' '+message.params[2].replace(/(\r\n|\n|\r)/gm,"") );
+          this.set('modeNick', message.params[2].replace(/(\r\n|\n|\r)/gm,"") );
+          return this.get('nick')+' sets mode '+message.params[1]+' on '+message.params[2];
+        }else{
+          this.set('extra', message.params[1].replace(/(\r\n|\n|\r)/gm,"") );
+          this.set('modeNick', null );
+          return this.get('nick')+' sets mode '+message.params[1];
+        }
+      case 'KICK':
+        this.set('extra', message.params[1].replace(/(\r\n|\n|\r)/gm,"") );
+        return ' * '+messageModel.get('extra')+' was kicked from '+messageModel.get('channel')+
+          ' by '+messageModel.get('nick')+'. (' +message.params[2]+')' );
+      case 'NICK':
+        this.set('extra', message.params[0].replace(/(\r\n|\n|\r)/gm,"") );
+        return ' * '+this.get('nick')+' is now known as '+this.get('extra');
       case 'RPL_TOPIC':
       case 'RPL_NOTOPIC':
         return message.params[2];
@@ -545,14 +578,7 @@ export default Backbone.Model.extend({
         
     }
   },
-  _parseNick(message){
-    if(message.parsed){
-      return message.parsed.nick;
-    }else{
-      return '';
-    }
-  },
-  //generates a raw command to send from the model properties
+   //generates a raw command to send from the model properties
   toString(){
     switch(this.get('command')){
       case 'JOIN':
@@ -576,6 +602,10 @@ export default Backbone.Model.extend({
         return 'TOPIC '+this.get('channel')+' :'+this.get('content');
       case 'WHOIS':
         return 'WHOIS '+this.get('extra');
+      case 'MODE':
+        return 'MODE '+this.get('channel')+' '+this.get('extra');
+      case 'KICK':
+        return 'KICK '+this.get('channel')+' '+this.get('extra')+' '+this.get('content');
       default:
         return '';
         break;

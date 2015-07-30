@@ -4,7 +4,9 @@ import Backbone from 'backbone';
 
 export default Backbone.Model.extend({
 	defaults:{
-		command: null,
+		label: null,
+		eventName: null,
+		roles: []
 	},
-  idAttribute: 'command'
+  idAttribute: 'eventName'
 });

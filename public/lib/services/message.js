@@ -1,7 +1,8 @@
 'use strict';
 
-import Service from 'backbone.service';
+import _ from 'underscore';
 import Backbone from 'backbone';
+import Service from 'backbone.service';
 import Radio from 'backbone.radio';
 import UserCollection from 'lib/models/userCollection';
 import MessageCollection from 'lib/models/messageCollection';
@@ -36,30 +37,54 @@ const MessageService = Service.extend({
         Radio.channel('socket').trigger('send',reply);
         this._addMessage(reply);
         break;
-      case 'ERR_NICKNAMEINUSE':
-        this._addMessage(messageModel);
-        var nick = Radio.channel('users').request('getNick')+Math.floor(Math.random() * 1001)
-        var reply = new MessageModel({command: 'NICK', nick: nick, channel:'server'});
-        Radio.channel('socket').trigger('send',reply);
-        this._addMessage(reply);
-        break;
       case 'JOIN':
         Radio.channel('users').trigger('join',messageModel);
-        messageModel.set('content', ' * '+messageModel.get('nick')+' has joined the channel.');
-        if(messageModel.get('nick') != Radio.channel('users').request('getNick')){
+        if(messageModel.get('nick') != Radio.channel('users').request('getMyNick')){
           this._addMessage(messageModel);  
         }
         break;
       case 'PART':
         Radio.channel('users').trigger('part',messageModel);
-        messageModel.set('content', ' * '+messageModel.get('nick')+' has left the channel('+messageModel.get('content')+').');
-        if(messageModel.get('nick') != Radio.channel('users').request('getNick')){
-          this._addMessage(messageModel);  
+        if(messageModel.get('nick') != Radio.channel('users').request('getMyNick')){
+          this._addMessage(messageModel);
         }
-        break;  
+        break;
+      case 'NICK':
+        _.each(this._channelMessages, (messages, channelName)=>{
+          if(Radio.channel('users').request('isUserInChannel', channelName, messageModel.get('nick'))){
+            this._addMessage(messageModel.clone().set('channel', channelName));
+          }
+        });
+        Radio.channel('users').trigger('nick',messageModel);
+      case 'QUIT':
+        _.each(this._channelMessages, (messages, channelName)=>{
+          if(Radio.channel('users').request('isUserInChannel', channelName, messageModel.get('nick'))){
+            this._addMessage(messageModel.clone().set('channel', channelName));
+          }
+        });
+        Radio.channel('users').trigger('quit',messageModel);
+        break;
+      case 'MODE':
+        if(messageModel.get('modeNick')){
+          Radio.channel('users').trigger('mode',messageModel);
+        }else{
+
+        }
+        messageModel.set('content', ' * '+messageModel.get('content') );
+        this._addMessage(messageModel);
+        break;
+      case 'KICK':
+        Radio.channel('users').trigger('kicked',messageModel);
+        Radio.channel('channels').trigger('kicked',messageModel);
+        var displayedMessage = messageModel.clone();
+        if(messageModel.get('extra') == Radio.channel('users').request('getMyNick') ){
+          displayedMessage.set('channel', 'server');
+        }
+        this._addMessage(displayedMessage);
+        break;     
+      case 'TOPIC':
       case 'RPL_TOPIC':
       case 'RPL_NOTOPIC':
-      case 'TOPIC':
         Radio.channel('channels').trigger('change:topic',messageModel.get('channel'), messageModel.get('content') );
         var topicChangeMessage = messageModel.clone();
         var topicPrefix = messageModel.get('nick')?' * '+messageModel.get('nick')+' set topic to "':' * Topic is "';
@@ -77,6 +102,13 @@ const MessageService = Service.extend({
         messageModel.set('channel', Radio.channel('channels').request('getActiveChannelName') );
         this._addMessage(messageModel);
         break;
+      case 'ERR_NICKNAMEINUSE':
+        this._addMessage(messageModel);
+        var nick = Radio.channel('users').request('getMyNick')+Math.floor(Math.random() * 1001)
+        var reply = new MessageModel({command: 'NICK', nick: nick, channel:'server'});
+        Radio.channel('socket').trigger('send',reply);
+        this._addMessage(reply);
+        break;       
       default:
         this._addMessage(messageModel);
         break;
@@ -100,7 +132,9 @@ const MessageService = Service.extend({
       channel: channelName,
       command: 'JOIN'
     });
-    Radio.channel('socket').trigger('send', messageModel);
+    if(channelModel.get('silent') !== true){
+      Radio.channel('socket').trigger('send', messageModel);
+    }
     var joinMessageModel = new MessageModel({
       channel:channelName,
       type: 'INFO',
@@ -115,11 +149,16 @@ const MessageService = Service.extend({
       channel: channelName,
       command: 'PART'
     });
-    Radio.channel('socket').trigger('send', messageModel);
+    if(channelModel.get('silent') !== true){
+      Radio.channel('socket').trigger('send', messageModel);
+    }
     delete this._channelMessages[channelName];
   },
   _resetChannels(){
-    this._channelMessages = {};
+    _.each(this._channelMessages, (collection, key, obj)=>{
+      collection.reset();
+      delete obj[key];
+    });
   },
   _activateChannel(channelModel){
     var channelName =  channelModel.get('name');
@@ -133,7 +172,8 @@ const MessageService = Service.extend({
     }
     return this._channelMessages[channelName];
   },
-  _channelMessages:{}
+  _channelMessages:{},
+  //need typed stuff stored for up arrow
 });
 
 export default new MessageService();

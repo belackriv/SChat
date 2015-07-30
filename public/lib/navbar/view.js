@@ -8,12 +8,12 @@ export default Marionette.ItemView.extend({
   initialize(){
     Radio.channel('navbar').on('valid',this._setFormGroupValidity.bind(this, true));
     Radio.channel('navbar').on('invalid',this._setFormGroupValidity.bind(this, false));
-    this.model.set('nick',Radio.channel('users').request('getNick'));
+    this.model.set('nick',Radio.channel('users').request('getMyNick'));
     this.model.set('server',Radio.channel('channels').request('getServerName'));
     this.model.set('connected',Radio.channel('channels').request('isConnected'));
     Radio.channel('channels').on('connect',this._modelChange.bind(this,'connected', true));
     Radio.channel('channels').on('disconnect',this._modelChange.bind(this,'connected', false));
-    Radio.channel('users').on('changeNick',this._modelChange.bind(this,'nick'));
+    Radio.channel('users').on('changeMyNick',this._modelChange.bind(this,'nick'));
   },
   template: template,
   className: 'container-fluid',
@@ -54,7 +54,7 @@ export default Marionette.ItemView.extend({
   _nickHandler(event){
     event.preventDefault();
     if(this.ui.nickInput.val()){
-      Radio.channel('users').trigger('changeNick', this.ui.nickInput.val(), this);
+      Radio.channel('users').trigger('changeMyNick', this.ui.nickInput.val(), this);
     }
   },
   _submitJoinHandler(event){

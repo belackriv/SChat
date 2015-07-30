@@ -1,7 +1,8 @@
 'use strict';
 
-import Service from 'backbone.service';
+import _ from 'underscore';
 import Backbone from 'backbone';
+import Service from 'backbone.service';
 import Radio from 'backbone.radio';
 import ChannelCollection from 'lib/models/channelCollection';
 import ChannelModel from 'lib/models/channelModel';
@@ -19,6 +20,7 @@ const ChannelService = Service.extend({
     Radio.channel('channels').on('disconnect',this._disconnect.bind(this));
     Radio.channel('channels').on('join',this._joinChannel.bind(this));
     Radio.channel('channels').on('part',this._partChannel.bind(this));
+    Radio.channel('users').on('kicked',this._kicked.bind(this));
     Radio.channel('channels').reply('isConnected', false);
     Radio.channel('channels').reply('getServerName', this.server);
     Radio.channel('channels').reply('getActiveChannelName', 'server');
@@ -27,7 +29,7 @@ const ChannelService = Service.extend({
     if(!this._connected){
       Radio.channel('socket').trigger('connect', {
         server: this.server,
-        nick: Radio.channel('users').request('getNick')
+        nick: Radio.channel('users').request('getMyNick')
       });
       this._joinChannel('server');
       this._connected = true;
@@ -41,9 +43,11 @@ const ChannelService = Service.extend({
     if(this._connected){
       Radio.channel('channels').reply('isConnected', false);
       this._connected = false; 
+      this._activeChannel.set('topic', 'Disconnected');
       this._partChannel(this.collection.findWhere({name:'server'}));
-      Radio.channel('channels').trigger('disconnect');
       Radio.channel('socket').trigger('disconnect');
+      Radio.channel('users').trigger('disconnect');
+      this.collection.reset();
       if(typeof callback ==='function'){
         callback();
       }
@@ -65,11 +69,20 @@ const ChannelService = Service.extend({
     }
     this.collection.remove(channelModel);
     if(channelModel.get('active') && this.collection.length > 0){
-      this.collection.last().set('active', true);
+      Radio.channel('channels').trigger('activate', this.collection.last() );
     }
   },
   _changeTopic(channelName, topic){
     this.collection.findWhere({name:channelName}).set('topic', topic);
+  },
+  _kicked(messageModel){
+    var channelName = messageModel.get('channel');
+    //if it is you that is leaving the channel 
+    if(messageModel.get('extra') == Radio.channel('users').request('getMyNick') ){
+      var channelModel = this.collection.findWhere({name:channelName});
+      channelModel.set('silent', true);
+      this._partChannel( channelModel );
+    }
   },
   _activateChannel(channelModel){
     this._activeChannel = channelModel;

@@ -51,23 +51,25 @@ export default Marionette.CompositeView.extend({
     //if(event.keyCode == 13){
       var activeChannelName = Radio.channel('channels').request('getActiveChannelName');
       var content = this.ui.contentInput.val();
-      var messageModel = new MessageModel();
-      if(content.indexOf('/') == 0){
-        var rawCommand = content.substring(1, content.indexOf(' '));
-        var rawContent = content.substring(content.indexOf(' ')+1);
-        messageModel.createCommand(rawCommand, rawContent);
-      }else{
-        messageModel.set({
-          nick: Radio.channel('users').request('getNick'),
-          command: 'PRIVMSG',
-          channel: activeChannelName,
-          content: content,
-          timestamp: new Date()
-        });
-        this.collection.add(messageModel)  
+      if(content){
+        var messageModel = new MessageModel();
+        if(content.indexOf('/') == 0){
+          var rawCommand = content.substring(1, content.indexOf(' '));
+          var rawContent = content.substring(content.indexOf(' ')+1);
+          messageModel.createCommand(rawCommand, rawContent);
+        }else{
+          messageModel.set({
+            nick: Radio.channel('users').request('getMyNick'),
+            command: 'PRIVMSG',
+            channel: activeChannelName,
+            content: content,
+            timestamp: new Date()
+          });
+          this.collection.add(messageModel)  
+        }
+        Radio.channel('messages').trigger('send', messageModel);
+        this.ui.contentInput.val('').focus();
       }
-      Radio.channel('messages').trigger('send', messageModel);      
-      this.ui.contentInput.val('').focus();
     //}
   },
   _submitForm(event){
