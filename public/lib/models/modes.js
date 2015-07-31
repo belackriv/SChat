@@ -1,41 +1,132 @@
 'use strict';
 
-import modeCollection from 'lib/models/modeCollection';
+import ModeCollection from 'lib/models/ModeCollection';
 
-export default new modeCollection([
+export default new ModeCollection([
 	{
 		label: 'Who Is?',
 		eventName: 'whois',
-		roles: ['op', 'voice', null]
+		symbol:  null,
+		type: 'query',
+		roles: ['op', 'voice', null],
+		scopes: ['userContext']
 	},
 	{
 		label: 'Op',
 		eventName: 'op',
-		roles: ['op']
+		type: 'mode',
+		symbol:  'o',
+		roles: ['op'],
+		scopes: ['userContext']
 	},
 	{
 		label: 'De-Op',
 		eventName: 'deop',
-		roles: ['op']
+		symbol:  'o',
+		type: 'mode',
+		roles: ['op'],
+		scopes: ['userContext']
 	},
 	{
 		label: 'Voice',
 		eventName: 'voice',
-		roles: ['op']
+		symbol:  'v',
+		type: 'mode',
+		roles: ['op'],
+		scopes: ['userContext']
 	},
 	{
 		label: 'De-Voice',
 		eventName: 'devoice',
-		roles: ['op']
+		symbol:  'v',
+		type: 'mode',
+		roles: ['op'],
+		scopes: ['userContext']
 	},
 	{
 		label: 'Kick',
 		eventName: 'kick',
-		roles: ['op']
+		symbol:  null,
+		type: 'command',
+		roles: ['op'],
+		scopes: ['userContext']
+	},
+	{
+		label: 'Show Channel Modes Dialog',
+		eventName: 'showChannelModes',
+		symbol:  null,
+		type: 'action',
+		roles: ['op'],
+		scopes: ['channelContext']
+	},
+	{
+		label: 'Private',
+		eventName: 'private',
+		symbol:  'p',
+		type: 'mode',
+		roles: ['op'],
+		scopes: ['channelDialog']
+	},
+	{
+		label: 'Secret',
+		eventName: 'secret',
+		symbol:  's',
+		type: 'mode',
+		roles: ['op'],
+		scopes: ['channelDialog']
+	},
+	{
+		label: 'Invite-Only',
+		eventName: 'inviteOnly',
+		symbol:  'i',
+		type: 'mode',
+		roles: ['op'],
+		scopes: ['channelDialog']
+	},
+	{
+		label: 'Only Ops Set Topic',
+		eventName: 'opsSetTopic',
+		symbol:  't',
+		type: 'mode',
+		roles: ['op'],
+		scopes: ['channelDialog']
+	},
+  {
+		label: 'No External Messsages',
+		eventName: 'noExternal',
+		symbol:  'n',
+		type: 'mode',
+		roles: ['op'],
+		scopes: ['channelDialog']
+	},
+	{
+		label: 'Moderated Channel',
+		eventName: 'moderated',
+		symbol:  'm',
+		type: 'mode',
+		roles: ['op'],
+		scopes: ['channelDialog']
+	},
+	{
+		label: 'Limit Channel Users',
+		eventName: 'limit',
+		symbol:  'l',
+		type: 'mode',
+		roles: ['op'],
+		scopes: ['channelDialog']
 	},
 	{
 		label: 'Ban',
 		eventName: 'ban',
-		roles: ['op']
+		type: 'command',
+		roles: ['op'],
+		scopes: ['user']
+	},
+	{
+		label: 'Bans',
+		eventName: 'bans',
+		type: 'mode',
+		roles: ['op'],
+		scopes: ['channelDialog']
 	}
 ]);

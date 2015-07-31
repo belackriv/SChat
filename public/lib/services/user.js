@@ -101,6 +101,9 @@ const UserService = Service.extend({
         userModel.set('nick', messageModel.get('extra'));
       }
     });
+    if( messageModel.get('extra') == this.myNick){
+      Radio.channel('users').trigger('changeMyNick', messageModel.get('extra') );
+    }
   },
   _changeMyNick(nick){
     this.myNick = nick;

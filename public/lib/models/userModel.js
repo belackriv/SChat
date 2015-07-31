@@ -4,7 +4,9 @@ import Backbone from 'backbone';
 
 export default Backbone.Model.extend({
   initialize(){
-    this.set('roles', new Array());
+    if(this.get('roles') == null){
+      this.set('roles', new Array());
+    }
   },
   defaults:{
     raw: null,

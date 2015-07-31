@@ -1,13 +1,23 @@
+body
+    overflow-x: hidden
 #main-section
-  position: absolute;
-  top: 75px
-  bottom: 75px
-  left: 25px
-  margin: auto
-  right: 25px
+    position: absolute;
+    margin: auto
+    bottom: 25px
+    left: 25px
+    right: 25px
+    top: 75px
+    @media screen and (min-width: 768px)
+        top: 175px
+    @media screen and (min-width: 992px)
+        top: 125px
+    @media screen and (min-width: 1200px)
+        top: 75px
 .schat-chat-layout-container,
 .schat-chat-panel
     height: 100%
+.schat-context-menu
+    width: 0
 a.schat-chat-tab-anchor
     cursor: pointer
 .schat-chat-tab-name
@@ -44,4 +54,4 @@ div.schat-messages-container
 li.schat-user-role-op
     background-color: LightBlue
 li.schat-user-role-voice
-    background-color: LightGreen    
+    background-color: LightGreen

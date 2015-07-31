@@ -54,7 +54,7 @@ export default Marionette.ItemView.extend({
   _nickHandler(event){
     event.preventDefault();
     if(this.ui.nickInput.val()){
-      Radio.channel('users').trigger('changeMyNick', this.ui.nickInput.val(), this);
+      Radio.channel('users').trigger('changeMyNick', this.ui.nickInput.val());
     }
   },
   _submitJoinHandler(event){
@@ -66,7 +66,7 @@ export default Marionette.ItemView.extend({
     if(this.ui.channelNameInput.val()){
       var name = this.ui.channelNameInput.val().toLowerCase();
       name = (name.indexOf('#') == 0)?name:'#'+name;
-      Radio.channel('channels').trigger('join', name, this);
+      Radio.channel('channels').trigger('join', name);
       this.ui.channelNameInput.val('');
     }
   },

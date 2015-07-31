@@ -275,6 +275,9 @@ const commandNumToStrLookup = {
 };
 
 export default Backbone.Model.extend({
+  initialize(){
+    this.set('timestamp', new Date());
+  },
 	defaults:{
     raw: null,
     channel: null,
@@ -548,7 +551,7 @@ export default Backbone.Model.extend({
       case 'KICK':
         this.set('extra', message.params[1].replace(/(\r\n|\n|\r)/gm,"") );
         return ' * '+messageModel.get('extra')+' was kicked from '+messageModel.get('channel')+
-          ' by '+messageModel.get('nick')+'. (' +message.params[2]+')' );
+          ' by '+messageModel.get('nick')+'. (' +message.params[2]+')';
       case 'NICK':
         this.set('extra', message.params[0].replace(/(\r\n|\n|\r)/gm,"") );
         return ' * '+this.get('nick')+' is now known as '+this.get('extra');

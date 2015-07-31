@@ -105,9 +105,9 @@ const MessageService = Service.extend({
       case 'ERR_NICKNAMEINUSE':
         this._addMessage(messageModel);
         var nick = Radio.channel('users').request('getMyNick')+Math.floor(Math.random() * 1001)
-        var reply = new MessageModel({command: 'NICK', nick: nick, channel:'server'});
-        Radio.channel('socket').trigger('send',reply);
-        this._addMessage(reply);
+        Radio.channel('users').trigger('changeMyNick', nick );
+        //do this after, navbar view will re-render when the nick is changed.
+        Radio.channel('navbar').trigger('invalid','nickInput', 'Nick In Use');
         break;       
       default:
         this._addMessage(messageModel);

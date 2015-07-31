@@ -1,83 +1,14 @@
 'use strict';
+
 import _ from 'underscore';
 import Backbone from 'backbone';
 import Marionette from 'marionette';
 import usersTemplate from './users.hbs!';
 import userTemplate from './user.hbs!';
-import userContextMenuItemTemplate from './userContextMenuItem.hbs!';
+import ModeCollection from 'lib/models/modeCollection';
 import modes from 'lib/models/modes';
 import Radio from 'backbone.radio';
-
-
-var ContextMenuRegion = Marionette.Region.extend({
-	onBeforeShow(view, region, options){
-		region.$el.position({
-			my: "left+3 bottom-3",
-			of: options.event,
-			collision: "fit"
-		});
-		region.open(view);
-		$('body').on('click contextmenu', function(event){
-			/*
-			if(event.target != view.el && view.$el.has(event.target).length == 0){
-				region.close(view);
-			}
-			if(event.type == 'contextmenu'){
-				if(event.target == view.el || view.$el.has(event.target).length){
-					event.preventDefault();
-					event.stopPropagation();
-				}
-			}*/
-			region.close(view);
-		});
-	},
-	open(view){
-		if(view){
-			view.$el.css('display','block');
-		}else if(this.currentView){
-			this.currentView.$el.css('display','block');
-		}
-	},
-	close(view){
-		if(view){
-			view.$el.css('display','none');
-		}else if(this.currentView){
-			this.currentView.$el.css('display','none');
-		}
-	}
-});
-
-var UserContextMenuItem = Marionette.ItemView.extend({
-	template: userContextMenuItemTemplate,
-	tagName: 'li',
-	className(){
-		var className = 'cursor-pointer';
-		var myUserModel = Radio.channel('users').request('getMyUserModelForChannel', this.options.channelModel.get('name') );
-		if(myUserModel == null || this.model.get('roles').indexOf(myUserModel.get('roleName')) == -1){
-			className += ' disabled';
-		}
-		return className;
-	},
-	triggers: {
-		'click': 'run:command'
-	}
-});
-
-var UserContextMenu = Marionette.CollectionView.extend({
-	childView: UserContextMenuItem,
-	tagName: 'ul',
-	className: 'dropdown-menu',
-	childViewOptions(){
-		return {
-			userModel: this.options.userModel,
-			channelModel: this.options.channelModel
-		};
-	},
-	onChildviewRunCommand(childView){
-		var eventName = childView.model.get('eventName').toLowerCase();
-		Radio.channel('users').trigger(eventName, this.options.userModel, this.options.channelModel);
-	}
-});
+import ContextMenu from './contextMenu';
 
 var UserChildView = Marionette.ItemView.extend({
 	template: userTemplate,
@@ -142,11 +73,7 @@ export default Marionette.LayoutView.extend({
 		userCountBadge: '.schat-user-count.badge'
 	},
 	regions:{
-		'list': '#user_list_container',
-		'menu': {
-			selector: '#user_context_menu',
-			regionClass: ContextMenuRegion
-		}
+		'list': '#user_list_container'
 	},
 	onBeforeShow(){
 		if(this.model){
@@ -164,14 +91,15 @@ export default Marionette.LayoutView.extend({
 		});
 	},
 	onChildviewShowMenu(childView, event){
-		this.getRegion('menu').show(new UserContextMenu({
-			collection: modes,
-			userModel: childView.model,
-			channelModel: this.model
-		}),
-		{
-			event: event
+		var userContextModes = modes.filter((mode)=>{
+			return mode.get('scopes').indexOf('userContext') > -1;
 		});
+		Radio.channel('contextMenu').trigger('open', event,
+			new ContextMenu({
+	      collection: new ModeCollection(userContextModes),
+	      userModel: childView.model,
+	      channelModel: this.model
+  	}));
 	},
 	onChildviewAddUser(childView){
 		this.model.set('userCount', this.model.get('userCount')+1);

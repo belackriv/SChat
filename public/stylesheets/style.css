@@ -1,14 +1,35 @@
+body {
+  overflow-x: hidden;
+}
 #main-section {
   position: absolute;
-  top: 75px;
-  bottom: 75px;
-  left: 25px;
   margin: auto;
+  bottom: 25px;
+  left: 25px;
   right: 25px;
+  top: 75px;
+}
+@media screen and (min-width: 768px) {
+  #main-section {
+    top: 175px;
+  }
+}
+@media screen and (min-width: 992px) {
+  #main-section {
+    top: 125px;
+  }
+}
+@media screen and (min-width: 1200px) {
+  #main-section {
+    top: 75px;
+  }
 }
 .schat-chat-layout-container,
 .schat-chat-panel {
   height: 100%;
+}
+.schat-context-menu {
+  width: 0;
 }
 a.schat-chat-tab-anchor {
   cursor: pointer;

@@ -6,6 +6,7 @@ import Service from 'backbone.service';
 import Radio from 'backbone.radio';
 import ChannelCollection from 'lib/models/channelCollection';
 import ChannelModel from 'lib/models/channelModel';
+import ChannelModesView from 'lib/chat/channelModes'
 
 const ChannelService = Service.extend({
   setup(options = {}) {
@@ -20,7 +21,8 @@ const ChannelService = Service.extend({
     Radio.channel('channels').on('disconnect',this._disconnect.bind(this));
     Radio.channel('channels').on('join',this._joinChannel.bind(this));
     Radio.channel('channels').on('part',this._partChannel.bind(this));
-    Radio.channel('users').on('kicked',this._kicked.bind(this));
+    Radio.channel('channels').on('kicked',this._kicked.bind(this));
+    Radio.channel('channels').on('showChannelModes',this._showChannelModes.bind(this));
     Radio.channel('channels').reply('isConnected', false);
     Radio.channel('channels').reply('getServerName', this.server);
     Radio.channel('channels').reply('getActiveChannelName', 'server');
@@ -83,6 +85,9 @@ const ChannelService = Service.extend({
       channelModel.set('silent', true);
       this._partChannel( channelModel );
     }
+  },
+  _showChannelModes(){
+    Radio.channel('dialog').trigger('open', new ChannelModesView() );
   },
   _activateChannel(channelModel){
     this._activeChannel = channelModel;
