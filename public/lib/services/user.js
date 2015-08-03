@@ -12,7 +12,7 @@ import KickView from 'lib/chat/kick';
 
 const UserService = Service.extend({
   start(){
-    this.myNick = "Guest"+ Math.floor(Math.random() * 1001);
+    this.myNick = 'Guest'+ Math.floor(Math.random() * 1001);
     Radio.channel('users').on('receive',this._receive.bind(this));
     Radio.channel('users').on('join',this._join.bind(this));
     Radio.channel('users').on('part',this._part.bind(this));
@@ -114,14 +114,14 @@ const UserService = Service.extend({
     });
     Radio.channel('messages').trigger('send', messageModel);
   },
-  _whois(userModel, channelModel){
+  _whois(channelModel, userModel){
     var messageModel = new MessageModel({
       extra: userModel.get('nick'),
       command: 'WHOIS'
     });
     Radio.channel('messages').trigger('send', messageModel);
   },
-  _op(userModel, channelModel){
+  _op(channelModel, userModel){
     var messageModel = new MessageModel({
       extra: '+o '+userModel.get('nick'),
       command: 'MODE',
@@ -129,7 +129,7 @@ const UserService = Service.extend({
     });
     Radio.channel('messages').trigger('send', messageModel);
   },
-  _deop(userModel, channelModel){
+  _deop(channelModel, userModel){
     var messageModel = new MessageModel({
       extra: '-o '+userModel.get('nick'),
       command: 'MODE',
@@ -137,7 +137,7 @@ const UserService = Service.extend({
     });
     Radio.channel('messages').trigger('send', messageModel);
   },
-  _voice(userModel, channelModel){
+  _voice(channelModel, userModel){
     var messageModel = new MessageModel({
       extra: '+v '+userModel.get('nick'),
       command: 'MODE',
@@ -145,7 +145,7 @@ const UserService = Service.extend({
     });
     Radio.channel('messages').trigger('send', messageModel);
   },
-  _devoice(userModel, channelModel){
+  _devoice(channelModel, userModel){
     var messageModel = new MessageModel({
       extra: '-v '+userModel.get('nick'),
       command: 'MODE',
@@ -153,13 +153,13 @@ const UserService = Service.extend({
     });
     Radio.channel('messages').trigger('send', messageModel);
   },
-  _kick(userModel, channelModel){
+  _kick(channelModel, userModel){
     var messageModel = new MessageModel({
       extra: userModel.get('nick'),
       command: 'KICK',
       channel: channelModel.get('name')
     });
-    var kickUser = function(data){
+    var kickUser = (data)=>{
       messageModel.set('content', data.reason);
       Radio.channel('messages').trigger('send', messageModel);
     };
@@ -180,7 +180,7 @@ const UserService = Service.extend({
       userCollection.remove(userModel);
     }
   },
-  _ban(userModel, channelModel){
+  _ban(channelModel, userModel){
     /*
     var messageModel = new MessageModel({
       extra: userModel.get('nick'),

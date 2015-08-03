@@ -1,0 +1,35 @@
+<form>
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		<h4 class="modal-title">Channel Info</h4>
+	</div>
+	<div class="modal-body">
+		<div class="form-group">
+			<label for="topic-input">Topic</label>
+			<input id="topic-input" name="topic" class="form-control"/>
+			<select name="topicHistory" class="form-control">
+				{{#each topicHistory}}
+					<option value="{{this}}">{{this}}</option>
+				{{/each}}
+			</select>
+		</div>
+		<div class="schat-channel-info-panes">
+			<div>
+				<div class="form-group">
+					<label class="control-label">Channel Modes</label>
+					<div class="schat-channel-mode-list"></div>
+				</div>
+			</div>
+			<div>
+				<div class="form-group">
+					<label class="control-label">Channel Bans</label>
+					<div class="schat-channel-ban-list"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal-footer">
+		<button type="submit" name="submit" class="btn btn-primary">OK</button>
+		<button type="button" name="cancel" class="btn btn-default" data-dismiss="modal">Cancel</button>
+	</div>
+</form>

@@ -63,12 +63,14 @@ export default Marionette.CompositeView.extend({
     var channelContextModes = modes.filter((mode)=>{
       return mode.get('scopes').indexOf('channelContext') > -1;
     });
-    Radio.channel('contextMenu').trigger('open', event,
-      new ContextMenu({
-        collection: new ModeCollection(channelContextModes),
-        userModel: null,
-        channelModel: this.model
-    }));
+    if(this.model){
+      Radio.channel('contextMenu').trigger('open', event,
+        new ContextMenu({
+          collection: new ModeCollection(channelContextModes),
+          userModel: null,
+          channelModel: this.model
+      }));
+    }
   },
   _submitForm(event){
     event.preventDefault();

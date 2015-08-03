@@ -17,7 +17,7 @@ export default Backbone.Model.extend({
 		symbol: null,
 		type: null,
 		roles: null,
-		scopes: null,
+		scopes: null
 	},
   idAttribute: 'eventName'
 });

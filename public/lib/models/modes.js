@@ -6,7 +6,7 @@ export default new ModeCollection([
 	{
 		label: 'Who Is?',
 		eventName: 'whois',
-		symbol:  null,
+		flag:  null,
 		type: 'query',
 		roles: ['op', 'voice', null],
 		scopes: ['userContext']
@@ -15,14 +15,14 @@ export default new ModeCollection([
 		label: 'Op',
 		eventName: 'op',
 		type: 'mode',
-		symbol:  'o',
+		flag:  'o',
 		roles: ['op'],
 		scopes: ['userContext']
 	},
 	{
 		label: 'De-Op',
 		eventName: 'deop',
-		symbol:  'o',
+		flag:  'o',
 		type: 'mode',
 		roles: ['op'],
 		scopes: ['userContext']
@@ -30,7 +30,7 @@ export default new ModeCollection([
 	{
 		label: 'Voice',
 		eventName: 'voice',
-		symbol:  'v',
+		flag:  'v',
 		type: 'mode',
 		roles: ['op'],
 		scopes: ['userContext']
@@ -38,7 +38,7 @@ export default new ModeCollection([
 	{
 		label: 'De-Voice',
 		eventName: 'devoice',
-		symbol:  'v',
+		flag:  'v',
 		type: 'mode',
 		roles: ['op'],
 		scopes: ['userContext']
@@ -46,15 +46,15 @@ export default new ModeCollection([
 	{
 		label: 'Kick',
 		eventName: 'kick',
-		symbol:  null,
+		flag:  null,
 		type: 'command',
 		roles: ['op'],
 		scopes: ['userContext']
 	},
 	{
 		label: 'Show Channel Modes Dialog',
-		eventName: 'showChannelModes',
-		symbol:  null,
+		eventName: 'showChannelInfo',
+		flag:  null,
 		type: 'action',
 		roles: ['op'],
 		scopes: ['channelContext']
@@ -62,58 +62,68 @@ export default new ModeCollection([
 	{
 		label: 'Private',
 		eventName: 'private',
-		symbol:  'p',
+		flag:  'p',
 		type: 'mode',
 		roles: ['op'],
-		scopes: ['channelDialog']
+		scopes: ['channelFlag']
 	},
 	{
 		label: 'Secret',
 		eventName: 'secret',
-		symbol:  's',
+		flag:  's',
 		type: 'mode',
 		roles: ['op'],
-		scopes: ['channelDialog']
+		scopes: ['channelFlag']
 	},
 	{
 		label: 'Invite-Only',
 		eventName: 'inviteOnly',
-		symbol:  'i',
+		flag:  'i',
 		type: 'mode',
 		roles: ['op'],
-		scopes: ['channelDialog']
+		scopes: ['channelFlag']
 	},
 	{
 		label: 'Only Ops Set Topic',
 		eventName: 'opsSetTopic',
-		symbol:  't',
+		flag:  't',
 		type: 'mode',
 		roles: ['op'],
-		scopes: ['channelDialog']
+		scopes: ['channelFlag']
 	},
   {
 		label: 'No External Messsages',
 		eventName: 'noExternal',
-		symbol:  'n',
+		flag:  'n',
 		type: 'mode',
 		roles: ['op'],
-		scopes: ['channelDialog']
+		scopes: ['channelFlag']
 	},
 	{
 		label: 'Moderated Channel',
 		eventName: 'moderated',
-		symbol:  'm',
+		flag:  'm',
 		type: 'mode',
 		roles: ['op'],
-		scopes: ['channelDialog']
+		scopes: ['channelFlag']
 	},
 	{
 		label: 'Limit Channel Users',
 		eventName: 'limit',
-		symbol:  'l',
+		flag:  'l',
 		type: 'mode',
 		roles: ['op'],
-		scopes: ['channelDialog']
+		scopes: ['channelFlag'],
+		varName: 'limit'
+	},
+	{
+		label: 'Set Channel Key',
+		eventName: 'key',
+		flag:  'k',
+		type: 'mode',
+		roles: ['op'],
+		scopes: ['channelFlag'],
+		varName: 'key'
 	},
 	{
 		label: 'Ban',
@@ -127,6 +137,6 @@ export default new ModeCollection([
 		eventName: 'bans',
 		type: 'mode',
 		roles: ['op'],
-		scopes: ['channelDialog']
+		scopes: ['channelBans']
 	}
 ]);

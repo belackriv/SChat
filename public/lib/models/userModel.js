@@ -31,7 +31,7 @@ export default Backbone.Model.extend({
       if(hasRole){
         userStr = userStr.slice(1);
       }
-      this.set('nick', userStr.replace(/(\r\n|\n|\r)/gm,"") );
+      this.set('nick', userStr.replace(/(\r\n|\n|\r)/gm, '') );
     }
   },
   parseMode(mode){
@@ -40,7 +40,6 @@ export default Backbone.Model.extend({
       methodName = 'promote';
     }
     this[methodName](mode[1]);
-    var test;
   },
   promote(role){
     this.addRole(role);

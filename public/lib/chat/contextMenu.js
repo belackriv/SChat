@@ -18,8 +18,8 @@ export default Marionette.CollectionView.extend({
 		var myUserModel = Radio.channel('users').request('getMyUserModelForChannel', this.options.channelModel.get('name') );
 		if(myUserModel != null && childView.model.get('roles').indexOf(myUserModel.get('roleName')) > -1){
 			var eventName = childView.model.get('eventName');
-			Radio.channel('users').trigger(eventName, this.options.userModel, this.options.channelModel);
-			Radio.channel('channels').trigger(eventName, this.options.userModel, this.options.channelModel);
+			Radio.channel('users').trigger(eventName, this.options.channelModel, this.options.userModel);
+			Radio.channel('channels').trigger(eventName, this.options.channelModel, this.options.userModel);
 			Radio.channel('contextMenu').trigger('close');
 		}
 	}

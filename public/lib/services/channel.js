@@ -4,14 +4,15 @@ import _ from 'underscore';
 import Backbone from 'backbone';
 import Service from 'backbone.service';
 import Radio from 'backbone.radio';
+import MessageModel from 'lib/models/messageModel';
 import ChannelCollection from 'lib/models/channelCollection';
 import ChannelModel from 'lib/models/channelModel';
-import ChannelModesView from 'lib/chat/channelModes'
+import ChannelInfoView from 'lib/chat/channelInfo'
 
 const ChannelService = Service.extend({
   setup(options = {}) {
     this.collection = new ChannelCollection();
-    this.server = "ws://dazed.ef.net:8080/ws";
+    this.server = 'ws://dazed.ef.net:8080/ws';
     //this.server = "ws://localhost:8080";
   },
   start(){
@@ -22,7 +23,8 @@ const ChannelService = Service.extend({
     Radio.channel('channels').on('join',this._joinChannel.bind(this));
     Radio.channel('channels').on('part',this._partChannel.bind(this));
     Radio.channel('channels').on('kicked',this._kicked.bind(this));
-    Radio.channel('channels').on('showChannelModes',this._showChannelModes.bind(this));
+    Radio.channel('channels').on('showChannelInfo',this._showChannelInfo.bind(this));
+    
     Radio.channel('channels').reply('isConnected', false);
     Radio.channel('channels').reply('getServerName', this.server);
     Radio.channel('channels').reply('getActiveChannelName', 'server');
@@ -75,7 +77,12 @@ const ChannelService = Service.extend({
     }
   },
   _changeTopic(channelName, topic){
-    this.collection.findWhere({name:channelName}).set('topic', topic);
+    var topicHistory = this.collection.findWhere({name:channelName}).get('topicHistory');
+    topicHistory.splice(0,0,topic);
+    this.collection.findWhere({name:channelName}).set({
+      'topicHistory': topicHistory,
+      'topic': topic
+    });
   },
   _kicked(messageModel){
     var channelName = messageModel.get('channel');
@@ -86,8 +93,23 @@ const ChannelService = Service.extend({
       this._partChannel( channelModel );
     }
   },
-  _showChannelModes(){
-    Radio.channel('dialog').trigger('open', new ChannelModesView() );
+  _showChannelInfo(channelModel, userModel){
+    var sendModes = (data)=>{
+      if(data.topic){
+        this._changeTopic(channelModel.get('name'), data.topic);
+      }
+    };
+    Radio.channel('dialog').on('submit', sendModes);
+    Radio.channel('dialog').once('close', ()=>{
+      Radio.channel('dialog').off('submit', sendModes);  
+    });
+    Radio.channel('dialog').trigger('open', new ChannelInfoView({model: channelModel}) );
+    var modesInfo = new MessageModel({
+      extra: '',
+      command: 'MODE',
+      channel: channelModel.get('name')
+    });
+    Radio.channel('messages').trigger('send', modesInfo);
   },
   _activateChannel(channelModel){
     this._activeChannel = channelModel;

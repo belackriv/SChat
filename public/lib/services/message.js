@@ -102,6 +102,8 @@ const MessageService = Service.extend({
         messageModel.set('channel', Radio.channel('channels').request('getActiveChannelName') );
         this._addMessage(messageModel);
         break;
+       case 'RPL_CHANNELMODEIS':
+        break;
       case 'ERR_NICKNAMEINUSE':
         this._addMessage(messageModel);
         var nick = Radio.channel('users').request('getMyNick')+Math.floor(Math.random() * 1001)

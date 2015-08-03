@@ -1,11 +1,13 @@
 'use strict';
 
-
 import Marionette from 'marionette';
-import channelModesTemplate from './channelModes.hbs!';
+import channelModeTemplate from './channelMode.hbs!';
 import Radio from 'backbone.radio';
 
+var ChannelModeView = Marionette.ItemView.extend({
+	template: channelModeTemplate,
+});
 
-export default Marionette.LayoutView.extend({
-	template: channelModesTemplate,
+export default Marionette.CollectionView.extend({
+	childView: ChannelModeView
 });

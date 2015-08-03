@@ -495,11 +495,11 @@ export default Backbone.Model.extend({
     if(typeof commandNumToStrLookup[message.command] !== 'undefined'){
       command = commandNumToStrLookup[message.command].toUpperCase();
     }
-    return command.replace(/(\r\n|\n|\r)/gm,"");
+    return command.replace(/(\r\n|\n|\r)/gm, '');
   },
   _parseNick(message){
     if(message.parsed && typeof message.parsed.nick === 'string'){
-      return message.parsed.nick.replace(/(\r\n|\n|\r)/gm,"");
+      return message.parsed.nick.replace(/(\r\n|\n|\r)/gm, '');
     }else{
       return '';
     }
@@ -512,15 +512,16 @@ export default Backbone.Model.extend({
       case 'TOPIC':
       case 'MODE':
       case 'KICK':
-        return message.params[0].replace(/(\r\n|\n|\r)/gm,"");
+        return message.params[0].replace(/(\r\n|\n|\r)/gm, '');
       case 'QUIT':
       case 'NICK':
         return null;
       case 'RPL_TOPIC':
       case 'RPL_NOTOPIC':
-        return message.params[1].replace(/(\r\n|\n|\r)/gm,"");
+      case 'RPL_CHANNELMODEIS':
+        return message.params[1].replace(/(\r\n|\n|\r)/gm, '');
       case 'RPL_NAMREPLY':
-        return message.params[2].replace(/(\r\n|\n|\r)/gm,"");  
+        return message.params[2].replace(/(\r\n|\n|\r)/gm, '');
       default:
         return 'server';
     }
@@ -535,25 +536,25 @@ export default Backbone.Model.extend({
       case 'TOPIC':
         return message.params[1];
       case 'QUIT':
-        return ' * '+this.get('nick')+' has quit('+message.params[0].replace(/(\r\n|\n|\r)/gm,"")+').';
+        return ' * '+this.get('nick')+' has quit('+message.params[0].replace(/(\r\n|\n|\r)/gm, '')+').';
       case 'MODE':
-        this.set('mode', message.params[1].replace(/(\r\n|\n|\r)/gm,"") );
+        this.set('mode', message.params[1].replace(/(\r\n|\n|\r)/gm, '') );
         // channel or user mode?
         if(message.params.length > 2){
-          this.set('extra', message.params[1].replace(/(\r\n|\n|\r)/gm,"")+' '+message.params[2].replace(/(\r\n|\n|\r)/gm,"") );
-          this.set('modeNick', message.params[2].replace(/(\r\n|\n|\r)/gm,"") );
+          this.set('extra', message.params[1].replace(/(\r\n|\n|\r)/gm, '')+' '+message.params[2].replace(/(\r\n|\n|\r)/gm, '') );
+          this.set('modeNick', message.params[2].replace(/(\r\n|\n|\r)/gm, '') );
           return this.get('nick')+' sets mode '+message.params[1]+' on '+message.params[2];
         }else{
-          this.set('extra', message.params[1].replace(/(\r\n|\n|\r)/gm,"") );
+          this.set('extra', message.params[1].replace(/(\r\n|\n|\r)/gm, '') );
           this.set('modeNick', null );
           return this.get('nick')+' sets mode '+message.params[1];
         }
       case 'KICK':
-        this.set('extra', message.params[1].replace(/(\r\n|\n|\r)/gm,"") );
+        this.set('extra', message.params[1].replace(/(\r\n|\n|\r)/gm, '') );
         return ' * '+messageModel.get('extra')+' was kicked from '+messageModel.get('channel')+
           ' by '+messageModel.get('nick')+'. (' +message.params[2]+')';
       case 'NICK':
-        this.set('extra', message.params[0].replace(/(\r\n|\n|\r)/gm,"") );
+        this.set('extra', message.params[0].replace(/(\r\n|\n|\r)/gm, '') );
         return ' * '+this.get('nick')+' is now known as '+this.get('extra');
       case 'RPL_TOPIC':
       case 'RPL_NOTOPIC':
@@ -572,10 +573,13 @@ export default Backbone.Model.extend({
       case 'RPL_WHOISOPERATOR':
       case 'RPL_WHOISIDLE':
         var idleTimeStr = moment.duration(parseInt(message.params[2]), 'seconds').humanize();
-        var signonTimeStr = moment(parseInt(message.params[3])*1000).format("dddd, MMMM Do YYYY, h:mm:ss a");
+        var signonTimeStr = moment(parseInt(message.params[3])*1000).format('dddd, MMMM Do YYYY, h:mm:ss a');
         return message.params[1]+' has been idle '+idleTimeStr+', signed on at '+signonTimeStr;
       case 'RPL_WHOISCHANNELS':
         return  message.params[1]+' on '+message.params[2];
+      case 'RPL_CHANNELMODEIS':
+        this.set('extra', message.params[2].replace(/(\r\n|\n|\r)/gm, ''));
+        return this.get('channel')+' MODE IS '+this.get('extra');
       default:
         return message.command +' : '+ message.params.join(' ');
         
@@ -593,7 +597,7 @@ export default Backbone.Model.extend({
       case 'PONG':
         return 'PONG '+this.get('extra');        
       case 'PRIVMSG':
-        return "PRIVMSG "+this.get('channel')+' :'+this.get('content');
+        return 'PRIVMSG '+this.get('channel')+' :'+this.get('content');
         break;
       case 'QUIT':
         return 'QUIT';
