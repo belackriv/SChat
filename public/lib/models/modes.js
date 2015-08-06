@@ -1,6 +1,6 @@
 'use strict';
 
-import ModeCollection from 'lib/models/ModeCollection';
+import ModeCollection from './modeCollection';
 import modesDefine from './modesDefine';
 
 export default new ModeCollection(modesDefine);
