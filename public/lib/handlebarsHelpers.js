@@ -2,6 +2,7 @@
 
 import Handlebars from 'handlebars';
 import Moment from 'moment';
+import ChatView from 'lib/chat/chat'
 
 Handlebars.registerHelper('moment', function(date, options) {
 	var formatStr = 'ddd, MMM D HH:mm:ssA';
@@ -10,3 +11,5 @@ Handlebars.registerHelper('moment', function(date, options) {
 	}
 	return moment(date).format(formatStr);
 });
+
+Handlebars.registerHelper('getModesStr', ChatView.prototype._getModesStr);

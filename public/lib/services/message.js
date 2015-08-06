@@ -65,12 +65,8 @@ const MessageService = Service.extend({
         Radio.channel('users').trigger('quit',messageModel);
         break;
       case 'MODE':
-        if(messageModel.get('modeNick')){
-          Radio.channel('users').trigger('mode',messageModel);
-        }else{
-
-        }
-        messageModel.set('content', ' * '+messageModel.get('content') );
+        Radio.channel('users').trigger('mode',messageModel);
+        Radio.channel('channels').trigger('mode',messageModel);
         this._addMessage(messageModel);
         break;
       case 'KICK':
@@ -102,15 +98,17 @@ const MessageService = Service.extend({
         messageModel.set('channel', Radio.channel('channels').request('getActiveChannelName') );
         this._addMessage(messageModel);
         break;
-       case 'RPL_CHANNELMODEIS':
-        break;
       case 'ERR_NICKNAMEINUSE':
         this._addMessage(messageModel);
         var nick = Radio.channel('users').request('getMyNick')+Math.floor(Math.random() * 1001)
         Radio.channel('users').trigger('changeMyNick', nick );
         //do this after, navbar view will re-render when the nick is changed.
         Radio.channel('navbar').trigger('invalid','nickInput', 'Nick In Use');
-        break;       
+        break;
+      case 'RPL_CHANNELMODEIS':
+        Radio.channel('users').trigger('mode',messageModel);
+        Radio.channel('channels').trigger('mode',messageModel);
+        break;
       default:
         this._addMessage(messageModel);
         break;
@@ -130,19 +128,20 @@ const MessageService = Service.extend({
   _addChannel(channelModel){
     var channelName = channelModel.get('name');
     var messageCollection = this._getMessageCollection(channelName);
-    var messageModel = new MessageModel({
-      channel: channelName,
-      command: 'JOIN'
-    });
-    if(channelModel.get('silent') !== true){
-      Radio.channel('socket').trigger('send', messageModel);
-    }
     var joinMessageModel = new MessageModel({
-      channel:channelName,
-      type: 'INFO',
+      channel: channelName,
+      command: 'JOIN',
       content: ' * Now Talking in '+channelName,
       timestamp: new Date()
     });
+    var modeMessageModel = new MessageModel({
+      channel: channelName,
+      command: 'MODE',
+    });
+    if(channelModel.get('silent') !== true){
+      Radio.channel('socket').trigger('send', joinMessageModel);
+      Radio.channel('socket').trigger('send', modeMessageModel);
+    }
     this._addMessage(joinMessageModel);
   },
   _removeChannel(channelModel){

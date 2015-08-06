@@ -1,10 +1,9 @@
 <div class="checkbox">
   <label>
-    <input type="checkbox" value="true" name="{{symbol}}">
+    <input type="checkbox" class="schat-channel-mode-checkbox" value="true" name="{{flag}}" {{#if isSet}}checked{{/if}} />
     {{label}}
-     {{#if varName}}
-		<input type="text" class="form-control" id="channel-flag-{{varName}}-input" name="{{varName}}" />
-		
-	  {{/if}}
+    {{#if paramName}}
+		<input type="text" class="form-control" id="channel-flag-{{paramName}}-input" name="{{paramName}}" value="{{param}}" />
+	{{/if}}
   </label>
 </div>

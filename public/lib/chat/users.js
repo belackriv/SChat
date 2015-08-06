@@ -96,10 +96,10 @@ export default Marionette.LayoutView.extend({
 		});
 		Radio.channel('contextMenu').trigger('open', event,
 			new ContextMenu({
-	      collection: new ModeCollection(userContextModes),
-	      userModel: childView.model,
-	      channelModel: this.model
-  	}));
+		      collection: new ModeCollection(userContextModes),
+		      userModel: childView.model,
+		      channelModel: this.model
+	  	}));
 	},
 	onChildviewAddUser(childView){
 		this.model.set('userCount', this.model.get('userCount')+1);

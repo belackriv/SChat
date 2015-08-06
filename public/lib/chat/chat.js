@@ -10,11 +10,6 @@ import ModeCollection from 'lib/models/modeCollection';
 import modes from 'lib/models/modes';
 import ContextMenu from './contextMenu';
 
-
-
-
-
-
 var ChatMsgView = Marionette.ItemView.extend({
   getTemplate(){
     switch(this.model.get('command')){
@@ -37,7 +32,8 @@ export default Marionette.CompositeView.extend({
   ui: {
     contentInput: 'input[name=content]',
     form: 'form',
-    topic: '.schat-topic-container'
+    topic: '.schat-topic-container',
+    mode: '.schat-mode-container'
   },
   events: {
     'contextmenu': '_handleContextMenu',
@@ -45,13 +41,34 @@ export default Marionette.CompositeView.extend({
     'submit @ui.form': '_submitForm'
   },
   modelEvents: {
-    'change:topic': '_changeTopic'
+    'change:topic': '_changeTopic',
+    'change:modes': '_changeModes',
   },
   onAttach(){
     this.ui.contentInput.focus();
   },
   _changeTopic(){
     this.ui.topic.text(this.model.get('topic'));
+  },
+  _changeModes(){
+    this.ui.mode.text(this._getModesStr(this.model.get('modes')));
+  },
+  _getModesStr(modes){
+    var str = '';
+    if(modes){
+      str += '+';
+      var limitStr = '';
+      for(let mode of modes){
+        if(mode.get('isSet')){
+          str += mode.get('flag');
+          if(mode.get('flag') == 'l'){
+            limitStr = mode.get('param');
+          }
+        }
+      }
+      str += ' '+limitStr
+    }
+    return str;
   },
   _handleKeyUp(event){
     //if(event.keyCode == 13){
@@ -77,7 +94,6 @@ export default Marionette.CompositeView.extend({
     this._sendMessage();
   },
   _sendMessage(){
-    var activeChannelName = Radio.channel('channels').request('getActiveChannelName');
     var content = this.ui.contentInput.val();
     if(content){
       var messageModel = new MessageModel();
@@ -89,14 +105,34 @@ export default Marionette.CompositeView.extend({
         messageModel.set({
           nick: Radio.channel('users').request('getMyNick'),
           command: 'PRIVMSG',
-          channel: activeChannelName,
+          channel: this.model.get('name'),
           content: content,
           timestamp: new Date()
         });
-        this.collection.add(messageModel)  
+        if(this._isMessageSendingAuthorized()){
+          this.collection.add(messageModel);
+        }
       }
       Radio.channel('messages').trigger('send', messageModel);
       this.ui.contentInput.val('').focus();
     }
+  },
+  _isMessageSendingAuthorized(){
+    var isMessageSendingAuthorized = true;
+    var channelIsModerated = false;
+    if(this.model){
+      for(let mode of this.model.get('modes')){
+        if(mode.get('flag') == 'm' && mode.get('isSet') == true){
+          channelIsModerated = true;
+        }
+      }
+    }
+    if(channelIsModerated){
+      var myUserModel = Radio.channel('users').request('getMyUserModelForChannel', this.model.get('name') );
+      if( myUserModel && myUserModel.get('roles').indexOf('o') == -1 && myUserModel.get('roles').indexOf('v') == -1 ){  
+        isMessageSendingAuthorized = false;
+      }
+    }
+    return isMessageSendingAuthorized;
   }
 });

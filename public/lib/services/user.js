@@ -5,6 +5,7 @@ import Backbone from 'backbone';
 import Service from 'backbone.service';
 import Radio from 'backbone.radio';
 import MessageModel from 'lib/models/messageModel';
+import ModeModel from 'lib/models/ModeModel';
 import UserCollection from 'lib/models/userCollection';
 import UserModel from 'lib/models/userModel';
 import KickView from 'lib/chat/kick';
@@ -85,13 +86,18 @@ const UserService = Service.extend({
   },
   _mode(messageModel){
     var channelName = messageModel.get('channel');
-    if(this._hasUserCollection(channelName)){
-      //is channel mode
-      var userCollection = this._getUserCollection(channelName);
-      var userModel = userCollection.get(messageModel.get('modeNick'));
-      userModel.parseMode(messageModel.get('mode'))
-    }else{
-      //is user mode
+    for(let modeModel of messageModel.get('modes')){
+      if(modeModel.get('scopes').indexOf('userFlag') > -1){
+        //for user flags
+      }else if(modeModel.get('scopes').indexOf('channelFlag') > -1){
+        if(this._hasUserCollection(channelName)){
+          var userCollection = this._getUserCollection(channelName);
+          var userModel = userCollection.get(modeModel.get('param'));
+          if(userModel){
+            userModel.parseMode(modeModel);
+          }
+        }
+      }  
     }
   },
   _nick(messageModel){
@@ -122,32 +128,52 @@ const UserService = Service.extend({
     Radio.channel('messages').trigger('send', messageModel);
   },
   _op(channelModel, userModel){
+    var modeModel = new ModeModel({
+      flag: 'o',
+      set: true,
+      param: userModel.get('nick')
+    });
     var messageModel = new MessageModel({
-      extra: '+o '+userModel.get('nick'),
+      modes: [modeModel],
       command: 'MODE',
       channel: channelModel.get('name'),
     });
     Radio.channel('messages').trigger('send', messageModel);
   },
   _deop(channelModel, userModel){
+    var modeModel = new ModeModel({
+      flag: 'o',
+      set: false,
+      param: userModel.get('nick')
+    });
     var messageModel = new MessageModel({
-      extra: '-o '+userModel.get('nick'),
+      modes: [modeModel],
       command: 'MODE',
       channel: channelModel.get('name'),
     });
     Radio.channel('messages').trigger('send', messageModel);
   },
   _voice(channelModel, userModel){
+    var modeModel = new ModeModel({
+      flag: 'v',
+      set: true,
+      param: userModel.get('nick')
+    });
     var messageModel = new MessageModel({
-      extra: '+v '+userModel.get('nick'),
+      modes: [modeModel],
       command: 'MODE',
       channel: channelModel.get('name'),
     });
     Radio.channel('messages').trigger('send', messageModel);
   },
   _devoice(channelModel, userModel){
+    var modeModel = new ModeModel({
+      flag: 'v',
+      set: false,
+      param: userModel.get('nick')
+    });
     var messageModel = new MessageModel({
-      extra: '-v '+userModel.get('nick'),
+      modes: [modeModel],
       command: 'MODE',
       channel: channelModel.get('name'),
     });

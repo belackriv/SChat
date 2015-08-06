@@ -16,18 +16,19 @@ const ChannelService = Service.extend({
     //this.server = "ws://localhost:8080";
   },
   start(){
-    Radio.channel('channels').on('change:topic',this._changeTopic.bind(this));
+    Radio.channel('channels').on('change:topic',this._changedTopic.bind(this));
     Radio.channel('channels').on('activate',this._activateChannel.bind(this));
     Radio.channel('channels').on('connect',this._connect.bind(this));
     Radio.channel('channels').on('disconnect',this._disconnect.bind(this));
     Radio.channel('channels').on('join',this._joinChannel.bind(this));
     Radio.channel('channels').on('part',this._partChannel.bind(this));
     Radio.channel('channels').on('kicked',this._kicked.bind(this));
+    Radio.channel('channels').on('mode',this._mode.bind(this));
     Radio.channel('channels').on('showChannelInfo',this._showChannelInfo.bind(this));
-    
     Radio.channel('channels').reply('isConnected', false);
     Radio.channel('channels').reply('getServerName', this.server);
     Radio.channel('channels').reply('getActiveChannelName', 'server');
+    Radio.channel('channels').reply('getChannelModel', this._getChannelModel.bind(this));
   },
   _connect(callback){
     if(!this._connected){
@@ -77,6 +78,14 @@ const ChannelService = Service.extend({
     }
   },
   _changeTopic(channelName, topic){
+    var topicMessage = new MessageModel({
+      content: topic,
+      command: 'TOPIC',
+      channel: channelName
+    });
+    Radio.channel('messages').trigger('send', topicMessage);
+  },
+  _changedTopic(channelName, topic){
     var topicHistory = this.collection.findWhere({name:channelName}).get('topicHistory');
     topicHistory.splice(0,0,topic);
     this.collection.findWhere({name:channelName}).set({
@@ -93,11 +102,30 @@ const ChannelService = Service.extend({
       this._partChannel( channelModel );
     }
   },
+  _mode(messageModel){
+    var channelName = messageModel.get('channel');
+    for(let modeModel of messageModel.get('modes')){
+      if(modeModel.get('scopes').indexOf('userFlag') > -1){
+        //for user flags
+      }else if(modeModel.get('scopes').indexOf('channelFlag') > -1){
+        var channelModel = this.collection.get(channelName);
+        if(channelModel){
+          channelModel.parseMode(modeModel);
+        }
+      }  
+    }
+  },
   _showChannelInfo(channelModel, userModel){
     var sendModes = (data)=>{
       if(data.topic){
         this._changeTopic(channelModel.get('name'), data.topic);
       }
+      var modesMessage = new MessageModel({
+        modes: data.modes,
+        command: 'MODE',
+        channel: channelModel.get('name')
+      });
+      Radio.channel('messages').trigger('send', modesMessage);
     };
     Radio.channel('dialog').on('submit', sendModes);
     Radio.channel('dialog').once('close', ()=>{
@@ -105,7 +133,6 @@ const ChannelService = Service.extend({
     });
     Radio.channel('dialog').trigger('open', new ChannelInfoView({model: channelModel}) );
     var modesInfo = new MessageModel({
-      extra: '',
       command: 'MODE',
       channel: channelModel.get('name')
     });
@@ -121,6 +148,9 @@ const ChannelService = Service.extend({
         model.set('active', false);
       }
     });
+  },
+  _getChannelModel(channelName){
+    return this.collection.get(channelName);
   }
 });
 

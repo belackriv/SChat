@@ -36,10 +36,10 @@ export default Backbone.Model.extend({
   },
   parseMode(mode){
     var methodName = 'demote';
-    if(mode[0] == '+'){
+    if(mode.get('isSet')){
       methodName = 'promote';
     }
-    this[methodName](mode[1]);
+    this[methodName](mode.get('flag'));
   },
   promote(role){
     this.addRole(role);

@@ -2,6 +2,7 @@
 
 import Backbone from 'backbone';
 import Moment from 'moment';
+import ModeModel from './modeModel';
 
 const commandNumToStrLookup = {
   '001':'RPL_WELCOME',
@@ -327,7 +328,7 @@ export default Backbone.Model.extend({
       }
 
       // strip trailing newlines
-      if (data.charAt(data.length-1) == "\n") {
+      if (data.charAt(data.length-1) == '\n') {
         data = data.slice(0, -1)
         message.raw = data
       }
@@ -519,6 +520,7 @@ export default Backbone.Model.extend({
       case 'RPL_TOPIC':
       case 'RPL_NOTOPIC':
       case 'RPL_CHANNELMODEIS':
+      case 'ERR_CANNOTSENDTOCHAN':
         return message.params[1].replace(/(\r\n|\n|\r)/gm, '');
       case 'RPL_NAMREPLY':
         return message.params[2].replace(/(\r\n|\n|\r)/gm, '');
@@ -538,17 +540,18 @@ export default Backbone.Model.extend({
       case 'QUIT':
         return ' * '+this.get('nick')+' has quit('+message.params[0].replace(/(\r\n|\n|\r)/gm, '')+').';
       case 'MODE':
-        this.set('mode', message.params[1].replace(/(\r\n|\n|\r)/gm, '') );
-        // channel or user mode?
-        if(message.params.length > 2){
-          this.set('extra', message.params[1].replace(/(\r\n|\n|\r)/gm, '')+' '+message.params[2].replace(/(\r\n|\n|\r)/gm, '') );
-          this.set('modeNick', message.params[2].replace(/(\r\n|\n|\r)/gm, '') );
-          return this.get('nick')+' sets mode '+message.params[1]+' on '+message.params[2];
-        }else{
-          this.set('extra', message.params[1].replace(/(\r\n|\n|\r)/gm, '') );
-          this.set('modeNick', null );
-          return this.get('nick')+' sets mode '+message.params[1];
+      case 'RPL_CHANNELMODEIS':
+        this.set('modes', ModeModel.parseModes(message));
+        var modesStr = '';
+        var params = [];
+        for(let modeModel of this.get('modes')){
+          modesStr += modeModel.get('isSet')?'+':'-';
+          modesStr += modeModel.get('flag');
+          if(modeModel.get('param')){
+            params.push(modeModel.get('param'));
+          }
         }
+        return ' * '+this.get('nick')+' sets mode for '+this.get('channel')+' '+modesStr+' '+params.join(' ');
       case 'KICK':
         this.set('extra', message.params[1].replace(/(\r\n|\n|\r)/gm, '') );
         return ' * '+messageModel.get('extra')+' was kicked from '+messageModel.get('channel')+
@@ -577,12 +580,10 @@ export default Backbone.Model.extend({
         return message.params[1]+' has been idle '+idleTimeStr+', signed on at '+signonTimeStr;
       case 'RPL_WHOISCHANNELS':
         return  message.params[1]+' on '+message.params[2];
-      case 'RPL_CHANNELMODEIS':
-        this.set('extra', message.params[2].replace(/(\r\n|\n|\r)/gm, ''));
-        return this.get('channel')+' MODE IS '+this.get('extra');
+      case 'ERR_CANNOTSENDTOCHAN':
+        return 'Cannot Send To Channel';
       default:
         return message.command +' : '+ message.params.join(' ');
-        
     }
   },
    //generates a raw command to send from the model properties
@@ -610,7 +611,29 @@ export default Backbone.Model.extend({
       case 'WHOIS':
         return 'WHOIS '+this.get('extra');
       case 'MODE':
-        return 'MODE '+this.get('channel')+' '+this.get('extra');
+        var modeSetArr = [];
+        var modeUnSetArr = [];
+        var params = [];
+        if(this.get('modes')){
+          for(let modeModel of this.get('modes')){
+            if(modeModel.get('isSet')){
+              modeSetArr.push(modeModel.get('flag'));
+            }else{
+              modeUnSetArr.push(modeModel.get('flag'));
+            }
+            if(modeModel.get('isSet') && modeModel.get('paramName')){
+              params.push(modeModel.get('param'));
+            }
+          }
+        }
+        var modesStr = '';
+        if(modeSetArr.length > 0){
+          modesStr += ' +'+modeSetArr.join('');
+        }
+        if(modeUnSetArr.length > 0){
+          modesStr += '-'+modeUnSetArr.join('');
+        }
+        return 'MODE '+this.get('channel')+' '+modesStr+' '+params.join(' ');
       case 'KICK':
         return 'KICK '+this.get('channel')+' '+this.get('extra')+' '+this.get('content');
       default:

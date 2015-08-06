@@ -49,5 +49,19 @@ var TabChildView = Marionette.ItemView.extend({
 export default Marionette.CompositeView.extend({
   childView: TabChildView,
   template: tabsTemplate,
-  childViewContainer: 'ul'
+  childViewContainer: 'ul',
+  onRender(){
+    this.$el.find('ul').sortable({
+      axis: 'x'
+    });
+  },
+  onAddChild(){
+    this._refreshSortable();
+  },
+  onRemoveChild(){
+    this._refreshSortable();
+  },
+  _refreshSortable(){
+     this.$el.find('ul').sortable('refresh');
+  }
 });
