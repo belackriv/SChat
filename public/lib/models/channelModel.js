@@ -1,8 +1,9 @@
 'use strict';
 
 import Backbone from 'backbone';
-import modes from 'lib/models/modes';
-
+import ModeCollection from './modeCollection';
+import BanMaskCollection from './banMaskCollection';
+import modes from './modes';
 
 export default Backbone.Model.extend({
   initialize(){
@@ -12,14 +13,24 @@ export default Backbone.Model.extend({
       this.set('topicHistory', new Array());
     }
     if(this.get('modes') == null){
+      var modesCollection = new ModeCollection();
       var channelModes = modes.filter((mode)=>{
         return mode.get('scopes').indexOf('channelModeContext') > -1;
       });
-      var clonedModes = [];
       for(let mode of channelModes){
-        clonedModes.push(mode.clone());
+        modesCollection.add(mode.clone());
       }
-      this.set('modes', clonedModes);
+      this.set('modes', modesCollection);
+      modesCollection.on('change', ()=>{
+        this.trigger('change:modes');
+      });
+    }
+    if(this.get('bans') === null){
+      var bansCollection = new BanMaskCollection();
+      this.set('bans', bansCollection);
+      bansCollection.on('change', ()=>{
+        this.trigger('change:bans');
+      });
     }
   },
   defaults:{
@@ -30,20 +41,17 @@ export default Backbone.Model.extend({
     stale: null,
     alerted: false,
     modes: null,
-    userCount: 0
+    userCount: 0,
+    bans: null
   },
   idAttribute: 'name',
   parseMode(mode){
-    for(let modeModel of this.get('modes')){
-      if(modeModel.get('flag') == mode.get('flag')){
-        modeModel.once('change', ()=>{
-          this.trigger('change:modes');
-        });
-        modeModel.set({
-          isSet:  mode.get('isSet'),
-          param:  mode.get('param')
-        });
-      }
+    var modeModel = this.get('modes').findWhere({flag: mode.get('flag')});
+    if(modeModel){
+      modeModel.set({
+        isSet:  mode.get('isSet'),
+        param:  mode.get('param')
+      });
     }
   }
 });

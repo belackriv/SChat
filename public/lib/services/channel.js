@@ -7,7 +7,9 @@ import Radio from 'backbone.radio';
 import MessageModel from 'lib/models/messageModel';
 import ChannelCollection from 'lib/models/channelCollection';
 import ChannelModel from 'lib/models/channelModel';
-import ChannelInfoView from 'lib/chat/channelInfo'
+import ChannelInfoView from 'lib/chat/channelInfo';
+import modes from 'lib/models/modes';
+import BanMaskModel from 'lib/models/banMaskModel';
 
 const ChannelService = Service.extend({
   setup(options = {}) {
@@ -23,6 +25,7 @@ const ChannelService = Service.extend({
     Radio.channel('channels').on('join',this._joinChannel.bind(this));
     Radio.channel('channels').on('part',this._partChannel.bind(this));
     Radio.channel('channels').on('kicked',this._kicked.bind(this));
+    Radio.channel('channels').on('bans',this._bans.bind(this));
     Radio.channel('channels').on('mode',this._mode.bind(this));
     Radio.channel('channels').on('showChannelInfo',this._showChannelInfo.bind(this));
     Radio.channel('channels').reply('isConnected', false);
@@ -115,6 +118,14 @@ const ChannelService = Service.extend({
       }  
     }
   },
+  _bans(messageModel){
+    var channelName = messageModel.get('channel');
+    var bans = this.collection.get(channelName).get('bans');
+    var banMask = messageModel.get('modes')[0].get('param');
+    if(!bans.get(banMask)){
+      bans.add(new BanMaskModel({mask: banMask}));
+    }
+  },
   _showChannelInfo(channelModel, userModel){
     var sendModes = (data)=>{
       if(data.topic){
@@ -137,6 +148,13 @@ const ChannelService = Service.extend({
       channel: channelModel.get('name')
     });
     Radio.channel('messages').trigger('send', modesInfo);
+    var bansInfoMode = modes.get('ban').clone().set('isSet', null);
+    var bansInfo = new MessageModel({
+      modes: [bansInfoMode],
+      command: 'MODE',
+      channel: channelModel.get('name')
+    });
+    Radio.channel('messages').trigger('send', bansInfo);
   },
   _activateChannel(channelModel){
     this._activeChannel = channelModel;

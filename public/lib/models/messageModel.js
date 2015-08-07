@@ -520,6 +520,7 @@ export default Backbone.Model.extend({
       case 'RPL_TOPIC':
       case 'RPL_NOTOPIC':
       case 'RPL_CHANNELMODEIS':
+      case 'RPL_BANLIST':
       case 'ERR_CANNOTSENDTOCHAN':
         return message.params[1].replace(/(\r\n|\n|\r)/gm, '');
       case 'RPL_NAMREPLY':
@@ -552,6 +553,15 @@ export default Backbone.Model.extend({
           }
         }
         return ' * '+this.get('nick')+' sets mode for '+this.get('channel')+' '+modesStr+' '+params.join(' ');
+      case 'RPL_BANLIST':
+        var mode = new ModeModel({
+          flag: 'b',
+          eventName: 'ban',
+          isSet: true,
+          param: message.params[2].replace(/(\r\n|\n|\r)/gm, '')
+        });
+        this.set('modes', [mode]);
+        return ' * Ban Mask';
       case 'KICK':
         this.set('extra', message.params[1].replace(/(\r\n|\n|\r)/gm, '') );
         return ' * '+messageModel.get('extra')+' was kicked from '+messageModel.get('channel')+
@@ -613,13 +623,16 @@ export default Backbone.Model.extend({
       case 'MODE':
         var modeSetArr = [];
         var modeUnSetArr = [];
+        var modeInfoArr = [];
         var params = [];
         if(this.get('modes')){
           for(let modeModel of this.get('modes')){
-            if(modeModel.get('isSet')){
+            if(modeModel.get('isSet') === true){
               modeSetArr.push(modeModel.get('flag'));
-            }else{
+            }else if(modeModel.get('isSet') === false){
               modeUnSetArr.push(modeModel.get('flag'));
+            }else{
+              modeInfoArr.push(modeModel.get('flag'));
             }
             if(modeModel.get('isSet') && modeModel.get('paramName')){
               params.push(modeModel.get('param'));
@@ -627,8 +640,11 @@ export default Backbone.Model.extend({
           }
         }
         var modesStr = '';
+        if(modeInfoArr.length > 0){
+          modesStr += modeInfoArr.join('');
+        }
         if(modeSetArr.length > 0){
-          modesStr += ' +'+modeSetArr.join('');
+          modesStr += '+'+modeSetArr.join('');
         }
         if(modeUnSetArr.length > 0){
           modesStr += '-'+modeUnSetArr.join('');

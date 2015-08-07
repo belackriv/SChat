@@ -109,6 +109,9 @@ const MessageService = Service.extend({
         Radio.channel('users').trigger('mode',messageModel);
         Radio.channel('channels').trigger('mode',messageModel);
         break;
+      case 'RPL_BANLIST':
+        Radio.channel('channels').trigger('bans',messageModel);
+        break;  
       default:
         this._addMessage(messageModel);
         break;

@@ -58,14 +58,14 @@ export default Marionette.CompositeView.extend({
     if(modes){
       str += '+';
       var limitStr = '';
-      for(let mode of modes){
+      modes.each((mode)=>{
         if(mode.get('isSet')){
           str += mode.get('flag');
           if(mode.get('flag') == 'l'){
             limitStr = mode.get('param');
           }
         }
-      }
+      });
       str += ' '+limitStr
     }
     return str;

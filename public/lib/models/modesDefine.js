@@ -129,15 +129,9 @@ export default
 	{
 		label: 'Ban',
 		eventName: 'ban',
-		type: 'command',
-		roles: ['op'],
-		scopes: ['user']
-	},
-	{
-		label: 'Bans',
-		eventName: 'bans',
+		flag: 'b',
 		type: 'mode',
 		roles: ['op'],
-		scopes: ['channelBans']
+		scopes: ['user']
 	}
 ];

@@ -5,6 +5,8 @@ import Marionette from 'marionette';
 import channelInfoTemplate from './channelInfo.hbs!';
 import ChannelModesView from './channelModes';
 import ModeCollection from 'lib/models/modeCollection';
+import ChannelBansView from './channelBans';
+import BanMaskCollection from 'lib/models/banMaskCollection';
 
 import Radio from 'backbone.radio';
 
@@ -14,12 +16,12 @@ export default Marionette.LayoutView.extend({
 		banList: '.schat-channel-ban-list',
 		modeList: '.schat-channel-mode-list',
 	},
-	modelEvents: {
-		'change:modes': '_modeChanged'
-	},
 	onBeforeShow(){
 		this.showChildView('modeList', new ChannelModesView({
-			collection: new ModeCollection( this.model.get('modes') )
+			collection: this.model.get('modes')
+		}));
+		this.showChildView('banList', new ChannelBansView({
+			collection: this.model.get('bans')
 		}));
 	},
 	ui:{
@@ -33,10 +35,9 @@ export default Marionette.LayoutView.extend({
 	},
 	_submitForm(event){
 		event.preventDefault();
-		var view = this;
 		var changedModes = [];
-		for(let checkbox of this.$el.find('.schat-channel-mode-checkbox').toArray() ){
-			for(let channelMode of this.model.get('modes') ){
+		this.$el.find('.schat-channel-mode-checkbox').each((idx, checkbox)=>{
+			this.model.get('modes').each((channelMode)=>{
 				if(	channelMode.get('flag') === checkbox.name){
 					var isChanged = false;
 					if(channelMode.get('isSet') !== checkbox.checked){
@@ -44,7 +45,7 @@ export default Marionette.LayoutView.extend({
 						isChanged = true;
 					}
 					if(channelMode.get('paramName')){
-						var paramValue = view.$el.find('input[name="'+channelMode.get('paramName')+'"]').val().trim();
+						var paramValue = this.$el.find('input[name="'+channelMode.get('paramName')+'"]').val().trim();
 						paramValue = paramValue==''?null:paramValue;
 						if(channelMode.get('param') !== paramValue){
 							if(channelMode.get('isSet')){
@@ -62,8 +63,8 @@ export default Marionette.LayoutView.extend({
 						changedModes.push(channelMode.clone());
 					}
 				}
-			}
-		}
+			});
+		});
 		var topic = (this.ui.topicInput.val().trim()=='')?null:this.ui.topicInput.val().trim();
 		Radio.channel('dialog').trigger('submit', {
 			topic: topic,
@@ -76,10 +77,5 @@ export default Marionette.LayoutView.extend({
 	},
 	_cancelForm(){
 		Radio.channel('dialog').trigger('close');
-	},
-	_modeChanged(){
-		this.showChildView('modeList', new ChannelModesView({
-			collection: new ModeCollection( this.model.get('modes') )
-		}));
 	}
 });
