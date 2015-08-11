@@ -91,6 +91,11 @@ const MessageService = Service.extend({
         Radio.channel('users').trigger('receive',messageModel);
         break;
       case 'RPL_WHOISUSER':
+        if(!Radio.channel('users').request('isBanPending', messageModel) ){
+          messageModel.set('channel', Radio.channel('channels').request('getActiveChannelName') );
+          this._addMessage(messageModel);
+        }
+        break;
       case 'RPL_WHOISSERVER':
       case 'RPL_WHOISOPERATOR':
       case 'RPL_WHOISIDLE':

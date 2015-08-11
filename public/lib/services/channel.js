@@ -8,6 +8,7 @@ import MessageModel from 'lib/models/messageModel';
 import ChannelCollection from 'lib/models/channelCollection';
 import ChannelModel from 'lib/models/channelModel';
 import ChannelInfoView from 'lib/chat/channelInfo';
+import ModeModel from 'lib/models/modeModel';
 import modes from 'lib/models/modes';
 import BanMaskModel from 'lib/models/banMaskModel';
 
@@ -26,6 +27,8 @@ const ChannelService = Service.extend({
     Radio.channel('channels').on('part',this._partChannel.bind(this));
     Radio.channel('channels').on('kicked',this._kicked.bind(this));
     Radio.channel('channels').on('bans',this._bans.bind(this));
+    Radio.channel('channels').on('ban:add',this._addBan.bind(this));
+    Radio.channel('channels').on('ban:remove',this._removeBan.bind(this));
     Radio.channel('channels').on('mode',this._mode.bind(this));
     Radio.channel('channels').on('showChannelInfo',this._showChannelInfo.bind(this));
     Radio.channel('channels').reply('isConnected', false);
@@ -115,7 +118,12 @@ const ChannelService = Service.extend({
         if(channelModel){
           channelModel.parseMode(modeModel);
         }
-      }  
+      }else if(modeModel.get('scopes').indexOf('channelBan') > -1){
+        var channelModel = this.collection.get(channelName);
+        if(channelModel){
+          channelModel.parseMode(modeModel);
+        }
+      }
     }
   },
   _bans(messageModel){
@@ -125,6 +133,36 @@ const ChannelService = Service.extend({
     if(!bans.get(banMask)){
       bans.add(new BanMaskModel({mask: banMask}));
     }
+  },
+  _removeBan(channelModel, banMaskModel){
+     var modeModel = new ModeModel({
+      flag: 'b',
+      isSet: false,
+      paramName: 'mask',
+      param: banMaskModel.get('mask'),
+      isParamAlwaysRequired: true
+    });
+    var removeBanMessage = new MessageModel({
+      command: 'MODE',
+      modes: [modeModel],
+      channel: channelModel.get('name')
+    });
+    Radio.channel('messages').trigger('send', removeBanMessage);
+  },
+  _addBan(channelModel, banMask){
+     var modeModel = new ModeModel({
+      flag: 'b',
+      isSet: true,
+      paramName: 'mask',
+      param: banMask,
+      isParamAlwaysRequired: true
+    });
+    var addBanMessage = new MessageModel({
+      command: 'MODE',
+      modes: [modeModel],
+      channel: channelModel.get('name')
+    });
+    Radio.channel('messages').trigger('send', addBanMessage);
   },
   _showChannelInfo(channelModel, userModel){
     var sendModes = (data)=>{

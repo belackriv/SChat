@@ -552,7 +552,8 @@ export default Backbone.Model.extend({
             params.push(modeModel.get('param'));
           }
         }
-        return ' * '+this.get('nick')+' sets mode for '+this.get('channel')+' '+modesStr+' '+params.join(' ');
+        var content =  ' * '+this.get('nick')+' sets mode for '+this.get('channel')+' '+modesStr+' '+params.join(' ');
+        return content;
       case 'RPL_BANLIST':
         var mode = new ModeModel({
           flag: 'b',
@@ -564,8 +565,8 @@ export default Backbone.Model.extend({
         return ' * Ban Mask';
       case 'KICK':
         this.set('extra', message.params[1].replace(/(\r\n|\n|\r)/gm, '') );
-        return ' * '+messageModel.get('extra')+' was kicked from '+messageModel.get('channel')+
-          ' by '+messageModel.get('nick')+'. (' +message.params[2]+')';
+        return ' * '+this.get('extra')+' was kicked from '+this.get('channel')+
+          ' by '+this.get('nick')+'. (' +message.params[2]+')';
       case 'NICK':
         this.set('extra', message.params[0].replace(/(\r\n|\n|\r)/gm, '') );
         return ' * '+this.get('nick')+' is now known as '+this.get('extra');
@@ -636,6 +637,8 @@ export default Backbone.Model.extend({
             }
             if(modeModel.get('isSet') && modeModel.get('paramName')){
               params.push(modeModel.get('param'));
+            }else if(modeModel.get('isParamAlwaysRequired')){
+              params.push(modeModel.get('param')); 
             }
           }
         }

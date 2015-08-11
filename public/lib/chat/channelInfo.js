@@ -21,17 +21,21 @@ export default Marionette.LayoutView.extend({
 			collection: this.model.get('modes')
 		}));
 		this.showChildView('banList', new ChannelBansView({
-			collection: this.model.get('bans')
+			collection: this.model.get('bans'),
+			channelModel: this.model
 		}));
 	},
 	ui:{
 		'form':'form',
 		'cancelButton': 'button[name=cancel]',
-		'topicInput': '#topic-input'
+		'topicInput': '#topic-input',
+		'addBanInput': 'input[name="add-mask"]',
+		'addBanButton': '.schat-channel-add-ban'
 	},
 	events:{
 		'submit @ui.form': '_submitForm',
-		'click @ui.cancelButton': '_cancelForm'
+		'click @ui.cancelButton': '_cancelForm',
+		'click @ui.addBanButton': '_addBan'
 	},
 	_submitForm(event){
 		event.preventDefault();
@@ -77,5 +81,8 @@ export default Marionette.LayoutView.extend({
 	},
 	_cancelForm(){
 		Radio.channel('dialog').trigger('close');
+	},
+	_addBan(){
+		Radio.channel('channels').trigger('ban:add', this.model, this.ui.addBanInput.val() );
 	}
 });

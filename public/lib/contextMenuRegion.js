@@ -6,11 +6,11 @@ export default Marionette.Region.extend({
 	onShow(view, region, options){
 		region.open(view);
 		region.$el.position({
-			at: "bottom right",
+			at: 'bottom right',
 			of: options.event,
-			collision: "fit"
+			collision: 'fit'
 		});
-		this.clickOffHandler = this.clickOff.bind(this, view, event);
+		this.clickOffHandler = this.clickOff.bind(this, view, options.event);
 		$('body').on('click contextmenu', this.clickOffHandler);
 	},
 	clickOff(view, event){

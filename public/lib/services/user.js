@@ -33,6 +33,7 @@ const UserService = Service.extend({
     Radio.channel('users').reply('getMyNick', this.myNick);
     Radio.channel('users').reply('getChannelUsers', this._getUserCollection.bind(this));
     Radio.channel('users').reply('isUserInChannel', this._isUserInChannel.bind(this));
+    Radio.channel('users').reply('isBanPending', this._isBanPending.bind(this));
     Radio.channel('users').reply('getMyUserModelForChannel', this._getMyUserModelForChannel.bind(this));
   },
   _receive(messageModel){
@@ -55,7 +56,8 @@ const UserService = Service.extend({
     var channelName = messageModel.get('channel');
     var userCollection = this._getUserCollection(channelName);
     if( !userCollection.get(messageModel.get('nick')) ){
-      var userModel =  new UserModel({nick:messageModel.get('nick')});
+      var userModel =  new UserModel();
+      userModel.parse(messageModel);
       userCollection.add(userModel);  
     }
   },
@@ -130,8 +132,10 @@ const UserService = Service.extend({
   _op(channelModel, userModel){
     var modeModel = new ModeModel({
       flag: 'o',
-      set: true,
-      param: userModel.get('nick')
+      isSet: true,
+      param: userModel.get('nick'),
+      paramName: 'nick',
+      isParamAlwaysRequired: true
     });
     var messageModel = new MessageModel({
       modes: [modeModel],
@@ -143,8 +147,10 @@ const UserService = Service.extend({
   _deop(channelModel, userModel){
     var modeModel = new ModeModel({
       flag: 'o',
-      set: false,
-      param: userModel.get('nick')
+      isSet: false,
+      param: userModel.get('nick'),
+      paramName: 'nick',
+      isParamAlwaysRequired: true
     });
     var messageModel = new MessageModel({
       modes: [modeModel],
@@ -156,8 +162,10 @@ const UserService = Service.extend({
   _voice(channelModel, userModel){
     var modeModel = new ModeModel({
       flag: 'v',
-      set: true,
-      param: userModel.get('nick')
+      isSet: true,
+      param: userModel.get('nick'),
+      paramName: 'nick',
+      isParamAlwaysRequired: true
     });
     var messageModel = new MessageModel({
       modes: [modeModel],
@@ -169,8 +177,10 @@ const UserService = Service.extend({
   _devoice(channelModel, userModel){
     var modeModel = new ModeModel({
       flag: 'v',
-      set: false,
-      param: userModel.get('nick')
+      isSet: false,
+      param: userModel.get('nick'),
+      paramName: 'nick',
+      isParamAlwaysRequired: true
     });
     var messageModel = new MessageModel({
       modes: [modeModel],
@@ -195,6 +205,30 @@ const UserService = Service.extend({
     });
     Radio.channel('dialog').trigger('open', new KickView() );
   },
+  _ban(channelModel, userModel){
+    userModel.set('isBanPending', true);
+    userModel.set('banPendingChannelModel', channelModel);
+    this._setUserPendingBan(userModel);
+    this._whois(channelModel, userModel);
+  },
+  _isBanPending(messageModel){
+    var whoIsUserModel = new UserModel();
+    whoIsUserModel.parse(messageModel);
+    var userModel = this._getUserPendingBan(whoIsUserModel.get('nick'));
+    if(userModel && userModel.get('isBanPending')){
+      userModel.parse(messageModel);
+      var banMask = '*@'+userModel.get('host');
+      var channelModel = userModel.get('banPendingChannelModel');
+      Radio.channel('channels').trigger('ban:add', channelModel, banMask );
+      this._kick(channelModel, userModel);
+      userModel.unset('isBanPending');
+      userModel.unset('banPendingChannelModel');
+      this._unsetUserPendingBan(userModel);
+      return true;
+    }else{
+      return false;
+    }
+  },
   _kicked(messageModel){
     var channelName = messageModel.get('channel');
     var userCollection = this._getUserCollection(channelName);
@@ -205,21 +239,6 @@ const UserService = Service.extend({
     }else if(userModel){
       userCollection.remove(userModel);
     }
-  },
-  _ban(channelModel, userModel){
-    /*
-    var messageModel = new MessageModel({
-      extra: userModel.get('nick'),
-      command: 'KICK',
-      channel: channelModel.get('name'),
-    });
-    var kickView = new KickView();
-    Radio.channel('dialog').on('submit', function(data){
-      messageModel.set('content', data.reason);
-      Radio.channel('messages').trigger('send', messageModel);
-    });
-    Radio.channel('dialog').trigger('open', kickView);
-    */
   },
   _getUserCollection(channelName){
     if(!this._hasUserCollection(channelName)){
@@ -251,7 +270,17 @@ const UserService = Service.extend({
   _hasUserCollection(channelName){
     return Object.prototype.hasOwnProperty.call(this._channelUsers, channelName);
   },
-  _channelUsers:{}
+  _getUserPendingBan(nick){
+    return this._pendingBansUsers[nick];
+  },
+  _setUserPendingBan(userModel){
+    this._pendingBansUsers[userModel.get('nick')] = userModel;
+  },
+   _unsetUserPendingBan(userModel){
+    delete this._pendingBansUsers[userModel.get('nick')];
+  },
+  _channelUsers:{},
+  _pendingBansUsers:{}
 });
 
 export default new UserService();

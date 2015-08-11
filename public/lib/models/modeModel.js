@@ -60,21 +60,12 @@ ModeModel.parseModes = function(message){
     }
     var modeModel = new ModeModel(definedMode);
     modeModel.set('isSet', mode.isSet);
-    switch(mode.flag){
-      case 'o':
-      case 'v':
-      case 'k':
-      case 'l':
-      case 'b':
-      case 'e':
-      case 'I':
-        if(modeModel.get('isSet')){
-          modeModel.set('param', message.params[paramIndex].replace(/(\r\n|\n|\r)/gm, ''));
-          paramIndex++;
-        }
-        break;
-      default:
-        break;
+    if(modeModel.get('isSet') && modeModel.get('paramName')){
+      modeModel.set('param', message.params[paramIndex].replace(/(\r\n|\n|\r)/gm, ''));
+      paramIndex++;
+    }else if(modeModel.get('isParamAlwaysRequired')){
+      modeModel.set('param', message.params[paramIndex].replace(/(\r\n|\n|\r)/gm, ''));
+      paramIndex++;
     }
     modes.push(modeModel);
   }

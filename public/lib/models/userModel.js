@@ -15,9 +15,10 @@ export default Backbone.Model.extend({
     roleSymbol: null,
     roleName: null,
     roles: null,
+    host: null,
   },
   idAttribute: 'nick',
-  parse(){
+  parse(messageModel){
     if(typeof this.get('raw') === 'string'){
       var userStr = this.get('raw');
       var hasRole = false;
@@ -32,6 +33,19 @@ export default Backbone.Model.extend({
         userStr = userStr.slice(1);
       }
       this.set('nick', userStr.replace(/(\r\n|\n|\r)/gm, '') );
+    }
+    if(messageModel){
+      switch(messageModel.get('command')){
+        case 'JOIN':
+          this.set('nick', messageModel.get('nick'));
+          this.set('name', messageModel.get('parsedMessage').parsed.user.replace(/(\r\n|\n|\r)/gm, ''));
+          this.set('host', messageModel.get('parsedMessage').parsed.host.replace(/(\r\n|\n|\r)/gm, ''));
+          break;
+        case 'RPL_WHOISUSER':
+          this.set('nick', messageModel.get('parsedMessage').params[1].replace(/(\r\n|\n|\r)/gm, ''));
+          this.set('name', messageModel.get('parsedMessage').params[2].replace(/(\r\n|\n|\r)/gm, ''));
+          this.set('host', messageModel.get('parsedMessage').params[3].replace(/(\r\n|\n|\r)/gm, ''));
+      }
     }
   },
   parseMode(mode){

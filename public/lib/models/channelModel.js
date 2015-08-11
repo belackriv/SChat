@@ -46,12 +46,23 @@ export default Backbone.Model.extend({
   },
   idAttribute: 'name',
   parseMode(mode){
-    var modeModel = this.get('modes').findWhere({flag: mode.get('flag')});
-    if(modeModel){
-      modeModel.set({
-        isSet:  mode.get('isSet'),
-        param:  mode.get('param')
-      });
+    if(mode.get('flag') == 'b'){
+      var bans = this.get('bans');
+      if(mode.get('isSet')){
+        if(!bans.get(mode.get('param'))){
+           bans.add({mask: mode.get('param')});
+        }
+      }else{  
+        bans.remove(mode.get('param'));
+      }
+    }else{
+      var modeModel = this.get('modes').findWhere({flag: mode.get('flag')});
+      if(modeModel){
+        modeModel.set({
+          isSet:  mode.get('isSet'),
+          param:  mode.get('param')
+        });
+      }
     }
   }
 });

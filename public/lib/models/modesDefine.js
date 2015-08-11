@@ -14,6 +14,8 @@ export default
 		type: 'mode',
 		flag:  'o',
 		isSet: true,
+		paramName: 'nick',
+		isParamAlwaysRequired: true,
 		roles: ['op'],
 		scopes: ['userContext', 'channelFlag']
 	},
@@ -22,6 +24,8 @@ export default
 		eventName: 'deop',
 		flag:  'o',
 		isSet: false,
+		paramName: 'nick',
+		isParamAlwaysRequired: true,
 		type: 'mode',
 		roles: ['op'],
 		scopes: ['userContext', 'channelFlag']
@@ -31,6 +35,8 @@ export default
 		eventName: 'voice',
 		flag:  'v',
 		isSet: true,
+		paramName: 'nick',
+		isParamAlwaysRequired: true,
 		type: 'mode',
 		roles: ['op'],
 		scopes: ['userContext', 'channelFlag']
@@ -40,6 +46,8 @@ export default
 		eventName: 'devoice',
 		flag:  'v',
 		isSet: false,
+		paramName: 'nick',
+		isParamAlwaysRequired: true,
 		type: 'mode',
 		roles: ['op'],
 		scopes: ['userContext', 'channelFlag']
@@ -48,6 +56,8 @@ export default
 		label: 'Kick',
 		eventName: 'kick',
 		flag:  null,
+		paramName: 'nick',
+		isParamAlwaysRequired: true,
 		type: 'command',
 		roles: ['op'],
 		scopes: ['userContext']
@@ -114,8 +124,8 @@ export default
 		flag:  'l',
 		type: 'mode',
 		roles: ['op'],
+		paramName: 'limit',
 		scopes: ['channelFlag', 'channelModeContext'],
-		paramName: 'limit'
 	},
 	{
 		label: 'Set Channel Key',
@@ -123,15 +133,17 @@ export default
 		flag:  'k',
 		type: 'mode',
 		roles: ['op'],
+		paramName: 'key',
 		scopes: ['channelFlag', 'channelModeContext'],
-		paramName: 'key'
 	},
 	{
 		label: 'Ban',
 		eventName: 'ban',
 		flag: 'b',
 		type: 'mode',
+		paramName: 'nick',
+		isParamAlwaysRequired: true,
 		roles: ['op'],
-		scopes: ['user']
+		scopes: ['userContext', 'channelBan']
 	}
 ];
