@@ -9,6 +9,7 @@ import chatPrivmsgTemplate from './chatPrivmsg.hbs!';
 import ModeCollection from 'lib/models/modeCollection';
 import modes from 'lib/models/modes';
 import ContextMenu from './contextMenu';
+import Handlebars from 'handlebars';
 
 var ChatMsgView = Marionette.ItemView.extend({
   getTemplate(){
@@ -19,17 +20,51 @@ var ChatMsgView = Marionette.ItemView.extend({
         return chatDefaultmsgTemplate;
     }
   },
+  ui:{
+    'contentContainer': '.schat-messages-content'
+  },
+  onBeforeRender(){
+    this._prepAlertedContent();
+  },
+  onRender(){
+    this._renderNew();
+    this._renderAlerted();
+  },
   onAttach(){
     this.el.scrollIntoView();
   },
   modelEvents:{
-    'change:new': '_changeNew'
+    'change:new': '_renderNew'
   },
-  _changeNew(){
+  _renderNew(){
     if(this.model.get('new')){
-      this.$el.addClass('alert alert-success');
+      this.$el.addClass('bg-warning');
     }else{
-      this.$el.removeClass('alert alert-success');
+      this.$el.removeClass('bg-warning', 1000);
+    }
+  },
+  _prepAlertedContent(){
+    if(typeof this.model.get('content') === 'string'){
+      if(this.model.get('alerted')){
+        var myNick = Radio.channel('users').request('getMyNick');
+        var content = this.model.get('content');
+        this.model.set('content', Handlebars.Utils.escapeExpression(content));
+        var contentWords = this.model.get('content').split(' ');
+        for(var i=0,wordCount=contentWords.length; i < wordCount; i++ ){
+          var word = contentWords[i];
+          if(word.indexOf(myNick) > -1){
+            contentWords[i] = '<span class="bg-primary">'+word+'</span>';
+          }
+        }
+        this.model.set('content',  new Handlebars.SafeString(contentWords.join(' ')));
+      }
+    }
+  },
+  _renderAlerted(){
+    if(this.model.get('alerted')){
+      this.$el.addClass('bg-info');
+    }else{
+      this.$el.removeClass('bg-info');
     }
   }
 });

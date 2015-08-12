@@ -171,6 +171,13 @@ const ChannelService = Service.extend({
       channelModel.set('stale', true);
       messageModel.set('new', true);
     }
+    var myNick = Radio.channel('users').request('getMyNick');
+    if( messageModel.get('content').indexOf(myNick) > -1){
+      if( channelModel.get('name') != this._activeChannel.get('name') ){
+        channelModel.set('alerted', true);
+      }
+      messageModel.set('alerted', true);
+    }
   },
   _showChannelInfo(channelModel, userModel){
     var sendModes = (data)=>{
@@ -209,7 +216,8 @@ const ChannelService = Service.extend({
       if(model == channelModel){
         model.set({
           active: true,
-          stale: false
+          stale: false,
+          alerted: false
         });
       }else{
         model.set('active', false);
