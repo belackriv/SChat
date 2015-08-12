@@ -593,8 +593,11 @@ export default Backbone.Model.extend({
         return  message.params[1]+' on '+message.params[2];
       case 'ERR_CANNOTSENDTOCHAN':
         return 'Cannot Send To Channel';
+      case 'ERR_BANNEDFROMCHAN':
+        this.set('extra', message.params[1].replace(/(\r\n|\n|\r)/gm, '') );
+        return message.params[1]+': '+message.params[2];
       default:
-        return message.command +' : '+ message.params.join(' ');
+        return this.get('command') +' : '+ message.params.join(' ');
     }
   },
    //generates a raw command to send from the model properties

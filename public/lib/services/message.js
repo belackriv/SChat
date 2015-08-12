@@ -107,13 +107,6 @@ const MessageService = Service.extend({
         messageModel.set('channel', Radio.channel('channels').request('getActiveChannelName') );
         this._addMessage(messageModel);
         break;
-      case 'ERR_NICKNAMEINUSE':
-        this._addMessage(messageModel);
-        var nick = Radio.channel('users').request('getMyNick')+Math.floor(Math.random() * 1001)
-        Radio.channel('users').trigger('changeMyNick', nick );
-        //do this after, navbar view will re-render when the nick is changed.
-        Radio.channel('navbar').trigger('invalid','nickInput', 'Nick In Use');
-        break;
       case 'RPL_CHANNELMODEIS':
         Radio.channel('users').trigger('mode',messageModel);
         Radio.channel('channels').trigger('mode',messageModel);
@@ -121,6 +114,22 @@ const MessageService = Service.extend({
       case 'RPL_BANLIST':
         Radio.channel('channels').trigger('bans',messageModel);
         break;  
+      case 'ERR_NICKNAMEINUSE':
+        this._addMessage(messageModel);
+        var nick = Radio.channel('users').request('getMyNick')+Math.floor(Math.random() * 1001)
+        Radio.channel('users').trigger('changeMyNick', nick );
+        //do this after, navbar view will re-render when the nick is changed.
+        Radio.channel('navbar').trigger('invalid','nickInput', 'Nick In Use');
+        break;
+      case 'ERR_BANNEDFROMCHAN':
+        Radio.channel('navbar').trigger('invalid','channelNameInput', 'Banned From Channel');
+        var channelModel =  Radio.channel('channels').request('getChannelModel', messageModel.get('extra'));
+        if(channelModel){
+          channelModel.set('silent', true);
+          Radio.channel('channels').trigger('part', channelModel);
+          this._removeChannel(channelModel);
+        }
+        this._addMessage(messageModel);
       default:
         this._addMessage(messageModel);
         break;
