@@ -5,13 +5,18 @@
     <link rel='stylesheet' href='/stylesheets/style.css' />
     <link rel='stylesheet' href='/jspm_packages/github/twbs/bootstrap@3.3.5/css/bootstrap.min.css' />
     <link rel='stylesheet' href='/jspm_packages/github/components/jqueryui@1.11.4/themes/ui-lightness/jquery-ui.min.css' />
-    <script src="jspm_packages/system.js"></script>
-	<script src="config.js"></script>
-	<script>
-		System.import('lib/main');
-	</script>
+    {{#if isDevEnv }}
+      <script src="jspm_packages/system.js"></script>
+      <script src="config.js"></script>
+      <script>
+      	System.import('lib/main');
+      </script>
+    {{/if}}
   </head>
   <body>
     {{{body}}}
   </body>
+  {{#unless isDevEnv}}
+    <script src="build.js"></script>
+  {{/unless}}
 </html>

@@ -65,14 +65,19 @@ const ChannelService = Service.extend({
       }
     }
   },
-  _joinChannel(name){
+  _joinChannel(name, doNotActivate){
     if(this.collection.where({name:name}).length < 1){
    	  Radio.channel('navbar').trigger('valid','channelNameInput');
       var channelModel = new ChannelModel({name:name});
       this.collection.add(channelModel);
-      Radio.channel('channels').trigger('activate', channelModel);
+      var myNick = Radio.channel('users').request('getMyNick');
+      if(!doNotActivate){
+        Radio.channel('channels').trigger('activate', channelModel);
+      }
+      return channelModel;
     }else{
       Radio.channel('navbar').trigger('invalid','channelNameInput', 'Already Joined Channel');
+      return null;
     }
   },
   _partChannel(channelModel){
@@ -166,12 +171,18 @@ const ChannelService = Service.extend({
     Radio.channel('messages').trigger('send', addBanMessage);
   },
   _addPrivmsg(messageModel){
+    var myNick = Radio.channel('users').request('getMyNick');
+    if(messageModel.get('channel') == myNick){
+      messageModel.set('channel', messageModel.get('nick'));
+    }
     var channelModel = this._getChannelModel( messageModel.get('channel') );
+    if(!channelModel){
+      channelModel= this._joinChannel( messageModel.get('channel'), true );
+    }
     if( channelModel.get('name') != this._activeChannel.get('name') ){
       channelModel.set('stale', true);
       messageModel.set('new', true);
     }
-    var myNick = Radio.channel('users').request('getMyNick');
     if( messageModel.get('content').indexOf(myNick) > -1){
       if( channelModel.get('name') != this._activeChannel.get('name') ){
         channelModel.set('alerted', true);
@@ -210,6 +221,9 @@ const ChannelService = Service.extend({
     Radio.channel('messages').trigger('send', bansInfo);
   },
   _activateChannel(channelModel){
+    if(this._activeChannel){
+      this._activeChannel.set('contentInputValue', Radio.channel('chat').request('getContentInputValue') );
+    }
     this._activeChannel = channelModel;
     Radio.channel('channels').reply('getActiveChannelName', channelModel.get('name'));
   	this.collection.each((model)=>{

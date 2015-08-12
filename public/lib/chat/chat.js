@@ -70,6 +70,9 @@ var ChatMsgView = Marionette.ItemView.extend({
 });
 
 export default Marionette.CompositeView.extend({
+  initialize(){
+    Radio.channel('chat').reply('getContentInputValue', this._getContentInputValue.bind(this));
+  },
   childView: ChatMsgView,
   template: chatTemplate,
   className: 'schat-chat-container',
@@ -114,6 +117,9 @@ export default Marionette.CompositeView.extend({
       str += ' '+limitStr
     }
     return str;
+  },
+  _getContentInputValue(){
+    return this.ui.contentInput.val();
   },
   _handleKeyUp(event){
     //if(event.keyCode == 13){
