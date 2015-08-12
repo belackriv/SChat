@@ -22,6 +22,16 @@ var ChatMsgView = Marionette.ItemView.extend({
   onAttach(){
     this.el.scrollIntoView();
   },
+  modelEvents:{
+    'change:new': '_changeNew'
+  },
+  _changeNew(){
+    if(this.model.get('new')){
+      this.$el.addClass('alert alert-success');
+    }else{
+      this.$el.removeClass('alert alert-success');
+    }
+  }
 });
 
 export default Marionette.CompositeView.extend({
@@ -121,11 +131,11 @@ export default Marionette.CompositeView.extend({
     var isMessageSendingAuthorized = true;
     var channelIsModerated = false;
     if(this.model){
-      for(let mode of this.model.get('modes')){
+      this.model.get('modes').each((mode)=>{
         if(mode.get('flag') == 'm' && mode.get('isSet') == true){
           channelIsModerated = true;
         }
-      }
+      });
     }
     if(channelIsModerated){
       var myUserModel = Radio.channel('users').request('getMyUserModelForChannel', this.model.get('name') );

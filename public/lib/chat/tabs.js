@@ -16,24 +16,28 @@ var TabChildView = Marionette.ItemView.extend({
     'click' : '_handleClick'
   },
   modelEvents: {
-    'change': 'render'
+    'change:active': '_checkStatus',
+    'change:stale': '_checkStatus',
+    'change:alerted': '_checkStatus'
   },
   attributes: {role:'presentation'},
   onRender(){
-    var view = this;
-    _.each(view._statusClasses,(statusClass)=>{
-      if(view.model.get(statusClass.status)){
-        view.$el.removeClass(_.pluck(view._statusClasses, 'class').join(' '));
-        view.$el.addClass(statusClass.class);
+    this._checkStatus();
+  },
+  _checkStatus(){
+    _.each(this._statusClasses,(statusClass)=>{
+      if(this.model.get(statusClass.status)){
+        this.$el.removeClass(_.pluck(this._statusClasses, 'class').join(' '));
+        this.$el.addClass(statusClass.class);
       }else{
-        view.$el.removeClass(statusClass.class);
+        this.$el.removeClass(statusClass.class);
       }
     });
   },
   _statusClasses: [
     {status: 'active', class: 'active'},
-    {status: 'stale', class: '"bg-warning'},
-    {status: 'alerted', class: '"bg-danger'}
+    {status: 'stale', class: 'bg-warning'},
+    {status: 'alerted', class: 'bg-danger'}
   ],
   _handleClick(event){
     if(event.target == this.ui.part.get(0) || this.ui.part.has(event.target).length){

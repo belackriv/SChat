@@ -26,6 +26,10 @@ const MessageService = Service.extend({
     //do stuff with certain messages
     switch(messageModel.get('command'))
     {
+      case 'PRIVMSG':
+        Radio.channel('channels').trigger('privmsg:add', messageModel);
+        this._addMessage(messageModel);
+        break;
       case 'PING':
         this._addMessage(messageModel);
         var reply = new MessageModel({command: 'PONG',
@@ -174,6 +178,11 @@ const MessageService = Service.extend({
     var userCollection = Radio.channel('users').request('getChannelUsers', channelName);
     var messageCollection = this._getMessageCollection(channelName);
     Radio.channel('chat').trigger('activate',channelModel, userCollection, messageCollection);
+    setTimeout(()=>{
+      messageCollection.each((message)=>{
+        message.set('new', false);
+      });
+    }, 5000);
   },
   _getMessageCollection(channelName){
     if(!Object.prototype.hasOwnProperty.call(this._channelMessages, channelName)){

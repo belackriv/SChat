@@ -30,6 +30,7 @@ const ChannelService = Service.extend({
     Radio.channel('channels').on('ban:add',this._addBan.bind(this));
     Radio.channel('channels').on('ban:remove',this._removeBan.bind(this));
     Radio.channel('channels').on('mode',this._mode.bind(this));
+    Radio.channel('channels').on('privmsg:add',this._addPrivmsg.bind(this));
     Radio.channel('channels').on('showChannelInfo',this._showChannelInfo.bind(this));
     Radio.channel('channels').reply('isConnected', false);
     Radio.channel('channels').reply('getServerName', this.server);
@@ -164,6 +165,13 @@ const ChannelService = Service.extend({
     });
     Radio.channel('messages').trigger('send', addBanMessage);
   },
+  _addPrivmsg(messageModel){
+    var channelModel = this._getChannelModel( messageModel.get('channel') );
+    if( channelModel.get('name') != this._activeChannel.get('name') ){
+      channelModel.set('stale', true);
+      messageModel.set('new', true);
+    }
+  },
   _showChannelInfo(channelModel, userModel){
     var sendModes = (data)=>{
       if(data.topic){
@@ -197,9 +205,12 @@ const ChannelService = Service.extend({
   _activateChannel(channelModel){
     this._activeChannel = channelModel;
     Radio.channel('channels').reply('getActiveChannelName', channelModel.get('name'));
-  	this.collection.forEach(function(model){
+  	this.collection.each((model)=>{
       if(model == channelModel){
-        model.set('active', true);
+        model.set({
+          active: true,
+          stale: false
+        });
       }else{
         model.set('active', false);
       }
