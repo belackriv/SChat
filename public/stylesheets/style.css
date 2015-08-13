@@ -85,3 +85,7 @@ li.schat-user-role-voice {
 .schat-channel-info-panes {
   display: flex;
 }
+.schat-message-textarea {
+  resize: none;
+  overflow: hidden;
+}
