@@ -39,12 +39,22 @@ export default Marionette.Application.extend({
         $('head').append('<link rel="icon" type="image/png" href="/SChat-FavIcon.png" />');
       }
     });
+    //do stuff to get nick
+    var query = {};
+    location.search.substr(1).split('&').forEach((item)=>{query[item.split('=')[0]] = item.split('=')[1]});
+    
+    if(query.nick){
+      Radio.channel('users').trigger('changeMyNick',query.nick);
+    }
 
-    Radio.channel('navbar').on('connected', ()=>{
-      setTimeout(()=>{
-        Radio.channel('navbar').trigger('join', '#test');
-      }, 1000);
-    });
-    Radio.channel('navbar').trigger('connect');
+    if(query.auto){
+      Radio.channel('navbar').on('connected', ()=>{
+        setTimeout(()=>{
+          
+          Radio.channel('navbar').trigger('join', '#test');
+        }, 1000);
+      });
+      Radio.channel('navbar').trigger('connect');
+    }
   }
 });
