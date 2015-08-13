@@ -78,14 +78,14 @@ export default Marionette.CompositeView.extend({
   className: 'schat-chat-container',
   childViewContainer: '.schat-messages-container',
   ui: {
-    contentInput: 'input[name=content]',
+    contentInput: 'textarea[name=content]',
     form: 'form',
     topic: '.schat-topic-container',
     mode: '.schat-mode-container'
   },
   events: {
     'contextmenu': '_handleContextMenu',
-    'keyup @ui.contentInput': '_handleKeyUp',
+    'keydown @ui.contentInput': '_handleKeyDown',
     'submit @ui.form': '_submitForm'
   },
   modelEvents: {
@@ -121,9 +121,70 @@ export default Marionette.CompositeView.extend({
   _getContentInputValue(){
     return this.ui.contentInput.val();
   },
-  _handleKeyUp(event){
-    //if(event.keyCode == 13){
-    //}
+  _lastTabMatch: {
+    index: null,
+    word: null,
+    wordStart: null
+  },
+  _resetLastTabMatch(){
+    this._lastTabMatch = {
+      index: null,
+      word: null,
+      wordStart: null
+    };
+  },
+  _handleKeyDown(event){
+    switch(event.keyCode)
+    {
+      case 9:
+        event.preventDefault();
+        var content = this._getContentInputValue();
+        if(this._lastTabMatch.word == null){
+          var cursorPos = this.ui.contentInput.get(0).selectionStart;
+          var wordEndPos = content.indexOf(' ', cursorPos);
+          wordEndPos = (wordEndPos > -1)?wordEndPos + cursorPos:content.length;
+          var wordStartPos = cursorPos;  
+          while(wordStartPos > 0){
+            if(content[wordStartPos] == ' '){
+              wordStartPos++;
+              break;
+            }
+            wordStartPos--;
+          }
+          this._lastTabMatch.word = content.substring(wordStartPos, wordEndPos);
+          this._lastTabMatch.wordStart = wordStartPos;
+        }
+        var word = this._lastTabMatch.word;
+        var userCollection = Radio.channel('users').request('getChannelUsers', this.model.get('name'));
+        var matches = [];
+        userCollection.each((user)=>{
+          if(user.get('nick').toLowerCase().indexOf(word.toLowerCase()) > -1){
+            matches.push(user.get('nick'));
+          }
+        });
+        var contentArray = content.split('');
+        if(matches.length > 0){
+          var spliceLength = (this._lastTabMatch.index==null)?word.length:null;
+          if(this._lastTabMatch.index >= matches.length){
+            spliceLength = (spliceLength==null)?matches[this._lastTabMatch.index-1].length:spliceLength;
+            this._lastTabMatch.index = null;
+          }
+          spliceLength = (spliceLength==null)?matches[this._lastTabMatch.index].length:spliceLength;
+          this._lastTabMatch.index = (this._lastTabMatch.index==null)?0:this._lastTabMatch.index;
+          contentArray.splice(this._lastTabMatch.wordStart, spliceLength, matches[this._lastTabMatch.index]);
+          this.ui.contentInput.val(contentArray.join(''));
+          this._lastTabMatch.index++;
+        }
+        break;
+      case 13:
+        event.preventDefault();
+        this._sendMessage();
+        this._resetLastTabMatch();
+        break;
+      default:
+        this._resetLastTabMatch();
+        break;
+    }
   },
   _handleContextMenu(event){
     event.preventDefault();

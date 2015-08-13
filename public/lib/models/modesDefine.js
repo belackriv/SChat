@@ -6,7 +6,15 @@ export default
 		flag:  null,
 		type: 'query',
 		roles: ['op', 'voice', null],
-		scopes: ['userContext', 'channelFlag']
+		scopes: ['userContext']
+	},
+	{
+		label: 'Message',
+		eventName: 'privmsg:start',
+		flag:  null,
+		type: 'command',
+		roles: ['op', 'voice', null],
+		scopes: ['userContext']
 	},
 	{
 		label: 'Op',

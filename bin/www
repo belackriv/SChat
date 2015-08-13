@@ -18,6 +18,7 @@ app.set('port', port);
 var env = process.env.ENV || 'development';
 app.set('env', env);
 
+console.log('listening on port'+port+' in env '+ env);
 /**
  * Create HTTP server. Set up socket.io
  */

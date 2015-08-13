@@ -30,6 +30,7 @@ const ChannelService = Service.extend({
     Radio.channel('channels').on('ban:add',this._addBan.bind(this));
     Radio.channel('channels').on('ban:remove',this._removeBan.bind(this));
     Radio.channel('channels').on('mode',this._mode.bind(this));
+    Radio.channel('channels').on('privmsg:start',this._startPrivmsg.bind(this));
     Radio.channel('channels').on('privmsg:add',this._addPrivmsg.bind(this));
     Radio.channel('channels').on('showChannelInfo',this._showChannelInfo.bind(this));
     Radio.channel('channels').reply('isConnected', false);
@@ -169,6 +170,12 @@ const ChannelService = Service.extend({
       channel: channelModel.get('name')
     });
     Radio.channel('messages').trigger('send', addBanMessage);
+  },
+  _startPrivmsg(channelModel, userModel){
+    var channelModel = this._getChannelModel( userModel.get('nick') );
+    if(!channelModel){
+      this._joinChannel( userModel.get('nick') );
+    }
   },
   _addPrivmsg(messageModel){
     var myNick = Radio.channel('users').request('getMyNick');
