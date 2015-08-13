@@ -28,6 +28,10 @@ const MessageService = Service.extend({
     {
       case 'PRIVMSG':
         Radio.channel('channels').trigger('privmsg:add', messageModel);
+        if(document.hidden){
+          $('head').find('link[rel=icon]').remove();
+          $('head').append('<link rel="icon" type="image/png" href="/SChat-FavIcon-New.png" />');
+        }
         this._addMessage(messageModel);
         break;
       case 'PING':

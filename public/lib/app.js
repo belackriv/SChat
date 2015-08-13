@@ -33,5 +33,11 @@ export default Marionette.Application.extend({
       var routeFound = Backbone.history.start({pushState: true});
       console.log('starting route "'+this.getCurrentRoute()+'" found: '+routeFound);
     }
+    document.addEventListener('visibilitychange',(event)=>{
+      if(!document.hidden){
+        $('head').find('link[rel=icon]').remove();
+        $('head').append('<link rel="icon" type="image/png" href="/SChat-FavIcon.png" />');
+      }
+    });
   }
 });
