@@ -273,7 +273,7 @@ export default Backbone.Model.extend({
         raw = command+' '+channel+' :'+topic;
         break;
       default:
-        raw = '';
+        raw = command+' '+content;
         break;
     }
     this.set('raw', raw);

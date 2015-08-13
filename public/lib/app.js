@@ -39,5 +39,12 @@ export default Marionette.Application.extend({
         $('head').append('<link rel="icon" type="image/png" href="/SChat-FavIcon.png" />');
       }
     });
+
+    Radio.channel('navbar').on('connected', ()=>{
+      setTimeout(()=>{
+        Radio.channel('navbar').trigger('join', '#test');
+      }, 1000);
+    });
+    Radio.channel('navbar').trigger('connect');
   }
 });

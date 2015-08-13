@@ -17,21 +17,21 @@ socketChannel.on('connect', function(options){
     server: options.server
   }, options);
 
-  if (window["WebSocket"]) {
+  if (window['WebSocket']) {
     socket = new WebSocket(options.server);
     
-    socket.addEventListener("open", function(event) {
+    socket.addEventListener('open', function(event) {
       var userReply = new MessageModel({command: 'USER', extra: options.user+' user dazed.ef.net :WebChat User'});
       socketChannel.trigger('send',userReply);
       var nickReply = new MessageModel({command: 'NICK', nick: options.nick});
       socketChannel.trigger('send',nickReply);
     });
 
-    socket.addEventListener("close", function(event) {
+    socket.addEventListener('close', function(event) {
         Radio.channel('channels').trigger('disconnect');
     });
 
-    socket.addEventListener("message", function(event) {
+    socket.addEventListener('message', function(event) {
         var messageModel = new MessageModel({raw:event.data});
         var message = messageModel.parse();
         
@@ -41,8 +41,10 @@ console.log('message command: '+messageModel.get('command'));
 console.log(message);
 console.log(event.data);
     });
+
+    Radio.channel('navbar').trigger('connected');
   } else {
-      //show "No socket" invalid message
+      //show 'No socket' invalid message
   }
 });
 
