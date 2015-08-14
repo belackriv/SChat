@@ -1,8 +1,11 @@
 'use strict';
 
+import Backbone from 'backbone';
 import Marionette from 'marionette';
 import Radio from 'backbone.radio';
-import MessageModel from 'lib/models/messageModel'
+import MessageModel from 'lib/models/messageModel';
+import InputHistoryModel from 'lib/models/inputHistoryModel';
+import InputHistoryCollection from 'lib/models/inputHistoryCollection';
 import chatTemplate from './chat.hbs!';
 import chatDefaultmsgTemplate from './chatDefaultmsg.hbs!';
 import chatPrivmsgTemplate from './chatPrivmsg.hbs!';
@@ -72,6 +75,7 @@ var ChatMsgView = Marionette.ItemView.extend({
 export default Marionette.CompositeView.extend({
   initialize(){
     Radio.channel('chat').reply('getContentInputValue', this._getContentInputValue.bind(this));
+    this._inputHistoryCollection = new InputHistoryCollection();
   },
   childView: ChatMsgView,
   template: chatTemplate,
@@ -121,6 +125,7 @@ export default Marionette.CompositeView.extend({
   _getContentInputValue(){
     return this.ui.contentInput.val();
   },
+  _freeInputMode: false,
   _lastTabMatch: {
     index: null,
     word: null,
@@ -133,57 +138,116 @@ export default Marionette.CompositeView.extend({
       wordStart: null
     };
   },
+  _inputHistoryInfo:{
+    index: 0,
+    firstPress: true
+  },
+  _resetInputHistoryInfo(isStored){
+    if(!isStored && this._inputHistoryInfo.firstPress === false){
+      this._inputHistoryCollection.pop();
+    }
+    this._inputHistoryInfo.index = this._inputHistoryCollection.length-1;
+    this._inputHistoryInfo.firstPress = true;
+  },
   _handleKeyDown(event){
-    switch(event.keyCode)
-    {
-      case 9:
+    if(this._freeInputMode){
+      if(event.shiftKey && event.keyCode==13){
         event.preventDefault();
-        var content = this._getContentInputValue();
-        if(this._lastTabMatch.word == null){
-          var cursorPos = this.ui.contentInput.get(0).selectionStart;
-          var wordEndPos = content.indexOf(' ', cursorPos);
-          wordEndPos = (wordEndPos > -1)?wordEndPos + cursorPos:content.length;
-          var wordStartPos = cursorPos;  
-          while(wordStartPos > 0){
-            if(content[wordStartPos] == ' '){
-              wordStartPos++;
-              break;
+        this._freeInputMode = false;
+      }
+    }else{
+      switch(event.keyCode)
+      {
+        case 9:
+          //tab key
+          event.preventDefault();
+          var content = this._getContentInputValue();
+          if(this._lastTabMatch.word == null){
+            var cursorPos = this.ui.contentInput.get(0).selectionStart;
+            var wordEndPos = content.indexOf(' ', cursorPos);
+            wordEndPos = (wordEndPos > -1)?wordEndPos + cursorPos:content.length;
+            var wordStartPos = cursorPos;  
+            while(wordStartPos > 0){
+              if(content[wordStartPos] == ' '){
+                wordStartPos++;
+                break;
+              }
+              wordStartPos--;
             }
-            wordStartPos--;
+            this._lastTabMatch.word = content.substring(wordStartPos, wordEndPos);
+            this._lastTabMatch.wordStart = wordStartPos;
           }
-          this._lastTabMatch.word = content.substring(wordStartPos, wordEndPos);
-          this._lastTabMatch.wordStart = wordStartPos;
-        }
-        var word = this._lastTabMatch.word;
-        var userCollection = Radio.channel('users').request('getChannelUsers', this.model.get('name'));
-        var matches = [];
-        userCollection.each((user)=>{
-          if(user.get('nick').toLowerCase().indexOf(word.toLowerCase()) > -1){
-            matches.push(user.get('nick'));
+          var word = this._lastTabMatch.word;
+          var userCollection = Radio.channel('users').request('getChannelUsers', this.model.get('name'));
+          var matches = [];
+          userCollection.each((user)=>{
+            if(user.get('nick').toLowerCase().indexOf(word.toLowerCase()) > -1){
+              matches.push(user.get('nick'));
+            }
+          });
+          var contentArray = content.split('');
+          if(matches.length > 0){
+            var spliceLength = (this._lastTabMatch.index==null)?word.length:null;
+            if(this._lastTabMatch.index >= matches.length){
+              spliceLength = (spliceLength==null)?matches[this._lastTabMatch.index-1].length:spliceLength;
+              this._lastTabMatch.index = null;
+            }
+            spliceLength = (spliceLength==null)?matches[this._lastTabMatch.index].length:spliceLength;
+            this._lastTabMatch.index = (this._lastTabMatch.index==null)?0:this._lastTabMatch.index;
+            contentArray.splice(this._lastTabMatch.wordStart, spliceLength, matches[this._lastTabMatch.index]);
+            this.ui.contentInput.val(contentArray.join(''));
+            this._lastTabMatch.index++;
           }
-        });
-        var contentArray = content.split('');
-        if(matches.length > 0){
-          var spliceLength = (this._lastTabMatch.index==null)?word.length:null;
-          if(this._lastTabMatch.index >= matches.length){
-            spliceLength = (spliceLength==null)?matches[this._lastTabMatch.index-1].length:spliceLength;
-            this._lastTabMatch.index = null;
+          break;
+        case 13:
+          //enter key
+          if(event.shiftKey){
+            this._freeInputMode = true;
+          }else{
+            event.preventDefault();
+            this._storeTypedInputValue();
+            this._sendMessage();
+            this._resetLastTabMatch();
           }
-          spliceLength = (spliceLength==null)?matches[this._lastTabMatch.index].length:spliceLength;
-          this._lastTabMatch.index = (this._lastTabMatch.index==null)?0:this._lastTabMatch.index;
-          contentArray.splice(this._lastTabMatch.wordStart, spliceLength, matches[this._lastTabMatch.index]);
-          this.ui.contentInput.val(contentArray.join(''));
-          this._lastTabMatch.index++;
-        }
-        break;
-      case 13:
-        event.preventDefault();
-        this._sendMessage();
-        this._resetLastTabMatch();
-        break;
-      default:
-        this._resetLastTabMatch();
-        break;
+          break;
+        case 38:
+          //uparrow
+          event.preventDefault();
+          this._resetLastTabMatch();
+          if(this._inputHistoryInfo.firstPress){
+            this._inputHistoryCollection.add({value: this.ui.contentInput.val()});
+            this._inputHistoryInfo.index++;
+            this._inputHistoryInfo.firstPress = false;
+          }
+          this._inputHistoryInfo.index--;
+          if(this._inputHistoryInfo.index < 0){
+            this._inputHistoryInfo.index = 0;
+          }
+          var inputHistoryModel = this._inputHistoryCollection.at(this._inputHistoryInfo.index);
+          if(inputHistoryModel){
+            this.ui.contentInput.val(inputHistoryModel.get('value'));
+          }
+          break;
+        case 40:
+          //downarrow
+          event.preventDefault();
+          this._resetLastTabMatch();
+          if(this._inputHistoryInfo.firstPress === false){
+            this._inputHistoryInfo.index++;
+            if(this._inputHistoryInfo.index > this._inputHistoryCollection.length - 1){
+              this._inputHistoryInfo.index = this._inputHistoryCollection.length - 1;
+            }
+            var inputHistoryModel = this._inputHistoryCollection.at(this._inputHistoryInfo.index);
+            if(inputHistoryModel){
+              this.ui.contentInput.val(inputHistoryModel.get('value'));
+            }
+          }
+          break;  
+        default:
+          this._resetLastTabMatch();
+          this._resetInputHistoryInfo();
+          break;
+      }
     }
   },
   _handleContextMenu(event){
@@ -204,6 +268,10 @@ export default Marionette.CompositeView.extend({
   _submitForm(event){
     event.preventDefault();
     this._sendMessage();
+  },
+  _storeTypedInputValue(){
+    this._inputHistoryCollection.add({value: this.ui.contentInput.val()});
+    this._resetInputHistoryInfo(true);
   },
   _sendMessage(){
     var content = this.ui.contentInput.val();
