@@ -11,6 +11,7 @@ import ChannelInfoView from 'lib/chat/channelInfo';
 import ModeModel from 'lib/models/modeModel';
 import modes from 'lib/models/modes';
 import BanMaskModel from 'lib/models/banMaskModel';
+import ChannelKeyView from 'lib/chat/channelKey';
 
 const ChannelService = Service.extend({
   setup(options = {}) {
@@ -24,6 +25,7 @@ const ChannelService = Service.extend({
     Radio.channel('channels').on('connect',this._connect.bind(this));
     Radio.channel('channels').on('disconnect',this._disconnect.bind(this));
     Radio.channel('channels').on('join',this._joinChannel.bind(this));
+    Radio.channel('channels').on('key:invalid',this._invalidChannelKey.bind(this));
     Radio.channel('channels').on('part',this._partChannel.bind(this));
     Radio.channel('channels').on('kicked',this._kicked.bind(this));
     Radio.channel('channels').on('bans',this._bans.bind(this));
@@ -66,10 +68,13 @@ const ChannelService = Service.extend({
       }
     }
   },
-  _joinChannel(name, doNotActivate){
+  _joinChannel(name, doNotActivate, channelKey){
     if(this.collection.where({name:name}).length < 1){
    	  Radio.channel('navbar').trigger('valid','channelNameInput');
       var channelModel = new ChannelModel({name:name});
+      if(channelKey){
+        channelModel.set('key', channelKey);
+      }
       this.collection.add(channelModel);
       var myNick = Radio.channel('users').request('getMyNick');
       if(!doNotActivate){
@@ -80,6 +85,16 @@ const ChannelService = Service.extend({
       Radio.channel('navbar').trigger('invalid','channelNameInput', 'Already Joined Channel');
       return null;
     }
+  },
+  _invalidChannelKey(messageModel){
+    var joinChannel = (data)=>{
+      this._joinChannel(messageModel.get('channel'), false, data.key);
+    };
+    Radio.channel('dialog').on('submit', joinChannel);
+    Radio.channel('dialog').once('close', ()=>{
+      Radio.channel('dialog').off('submit', joinChannel);  
+    });
+    Radio.channel('dialog').trigger('open', new ChannelKeyView() );
   },
   _partChannel(channelModel){
     if(channelModel.get('name') === 'server'){

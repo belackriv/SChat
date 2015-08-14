@@ -31,13 +31,29 @@ export default Marionette.LayoutView.extend({
   onRender(){
   	this.ui.dialog.modal({show:false});
   },
+  _dialogShown: false,
   _openDialog(view){
-    this.showChildView('dialogContent', view);
-  	this.ui.dialog.modal('show');
+    var showDialog = ()=>{
+      this.showChildView('dialogContent', view);
+      this.ui.dialog.one('shown.bs.modal', ()=>{
+        view.triggerMethod('modal:shown');
+        this._dialogShown = true;  
+      });
+      this.ui.dialog.modal('show');
+    };
+    if(this._dialogShown){
+      this.ui.dialog.one('hidden.bs.modal', ()=>{
+        showDialog();  
+      });
+    }else{
+      showDialog();
+    }
   },
 	_closeDialog(){
     this.ui.dialog.one('hidden.bs.modal', ()=>{
-      this.getRegion('dialogContent').reset();  
+      this.getRegion('dialogContent').currentView.triggerMethod('modal:hidden');
+      this.getRegion('dialogContent').reset();
+      this._dialogShown = false;
     });
 		this.ui.dialog.modal('hide');
 	},

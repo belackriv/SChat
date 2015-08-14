@@ -15,9 +15,9 @@ export default Marionette.LayoutView.extend({
   className: 'schat-chat-layout-container',
   template: layoutTpl,
   regions: {
-    tabs: "#chat_tabs_container",
-    users: "#chat_users_container",
-    messages: "#chat_messages_container"
+    tabs: '#chat_tabs_container',
+    users: '#chat_users_container',
+    messages: '#chat_messages_container'
   },
   onBeforeShow(){
     this.showChildView('tabs', new TabsView({

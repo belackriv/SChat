@@ -117,7 +117,19 @@ const MessageService = Service.extend({
         break;
       case 'RPL_BANLIST':
         Radio.channel('channels').trigger('bans',messageModel);
-        break;  
+        break;
+      case 'ERR_BADCHANNELKEY':
+        Radio.channel('navbar').trigger('invalid','channelNameInput', 'Bad Channel Key');
+        var channelModel =  Radio.channel('channels').request('getChannelModel', messageModel.get('channel'));
+        if(channelModel){
+          channelModel.set('silent', true);
+          Radio.channel('channels').trigger('part', channelModel);
+          this._removeChannel(channelModel);
+        }
+        Radio.channel('channels').trigger('key:invalid', messageModel);
+        var displayedMessage = messageModel.clone().set('channel', 'server');
+        this._addMessage(displayedMessage);
+        break;
       case 'ERR_NICKNAMEINUSE':
         this._addMessage(messageModel);
         var nick = Radio.channel('users').request('getMyNick')+Math.floor(Math.random() * 1001)
@@ -159,6 +171,9 @@ const MessageService = Service.extend({
       content: ' * Now Talking in '+channelName,
       timestamp: new Date()
     });
+    if(channelModel.get('key')){
+      joinMessageModel.set('key',channelModel.get('key'));
+    }
     var modeMessageModel = new MessageModel({
       channel: channelName,
       command: 'MODE',

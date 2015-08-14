@@ -1,14 +1,14 @@
 'use strict';
 
 import Marionette from 'marionette';
-import kickTemplate from './kick.hbs!';
+import channelKeyTemplate from './channelKey.hbs!';
 import Radio from 'backbone.radio';
 
 export default Marionette.ItemView.extend({
-	template: kickTemplate,
+	template: channelKeyTemplate,
 	ui:{
 		'form':'form',
-		'reasonInput': 'input[name=reason]',
+		'keyInput': 'input[name=key]',
 		'cancelButton': 'button[name=cancel]'
 	},
 	events:{
@@ -16,11 +16,11 @@ export default Marionette.ItemView.extend({
 		'click @ui.cancelButton': '_cancelForm'
 	},
 	onModalShown(){
-		this.ui.reasonInput.focus();
+		this.ui.keyInput.focus();
 	},
 	_submitForm(event){
 		event.preventDefault();
-		Radio.channel('dialog').trigger('submit', { reason: this.ui.reasonInput.val() });
+		Radio.channel('dialog').trigger('submit', { key: this.ui.keyInput.val() });
 		Radio.channel('dialog').trigger('close');
 	},
 	_cancelForm(){

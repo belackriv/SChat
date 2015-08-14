@@ -496,6 +496,7 @@ export default Backbone.Model.extend({
       case 'RPL_CHANNELMODEIS':
       case 'RPL_BANLIST':
       case 'ERR_CANNOTSENDTOCHAN':
+      case 'ERR_BADCHANNELKEY':
         return message.params[1].replace(/(\r\n|\n|\r)/gm, '');
       case 'RPL_NAMREPLY':
         return message.params[2].replace(/(\r\n|\n|\r)/gm, '');
@@ -578,7 +579,11 @@ export default Backbone.Model.extend({
   toString(){
     switch(this.get('command')){
       case 'JOIN':
-        return 'JOIN '+this.get('channel');
+        var keyStr = '';
+        if(this.get('key')){
+          keyStr = ' '+this.get('key');
+        }
+        return 'JOIN '+this.get('channel')+keyStr;
       case 'NICK':
         return 'NICK '+this.get('nick');
       case 'PART':
