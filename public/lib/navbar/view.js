@@ -13,8 +13,8 @@ export default Marionette.ItemView.extend({
     this.model.set('nick',Radio.channel('users').request('getMyNick'));
     this.model.set('server',Radio.channel('channels').request('getServerName'));
     this.model.set('connected',Radio.channel('channels').request('isConnected'));
-    Radio.channel('channels').on('connect',this._modelChange.bind(this,'connected', true));
-    Radio.channel('channels').on('disconnect',this._modelChange.bind(this,'connected', false));
+    Radio.channel('channels').on('connect',this._connected.bind(this));
+    Radio.channel('channels').on('disconnect',this._disconnected.bind(this));
     Radio.channel('users').on('changeMyNick',this._modelChange.bind(this,'nick'));
   },
   template: template,
@@ -43,6 +43,14 @@ export default Marionette.ItemView.extend({
   _modelChange(prop, value){
     this.model.set(prop, value);
   },
+  _connected(){
+    this.ui.joinButton.removeClass('disable');
+    this._modelChange('connected', true);
+  },
+  _disconnected(){
+    this.ui.joinButton.addClass('disable');
+    this._modelChange('connected', false);
+  },
   _connectionHandler(){
     if(Radio.channel('channels').request('isConnected')){
       Radio.channel('channels').trigger('disconnect');
@@ -65,17 +73,21 @@ export default Marionette.ItemView.extend({
     this._joinHandler();
   },
   _joinHandler(event){
-    var name = null;
-    if(typeof event === 'string'){
-      name = event;
+    if(this.model.get('connected')){
+      var name = null;
+      if(typeof event === 'string'){
+        name = event;
+      }else{
+        event.preventDefault();
+        name = this.ui.channelNameInput.val().toLowerCase();
+      }
+      if(name){
+        name = (name.indexOf('#') == 0)?name:'#'+name;
+        Radio.channel('channels').trigger('join', name);
+        this.ui.channelNameInput.val('');
+      }
     }else{
-      event.preventDefault();
-      name = this.ui.channelNameInput.val().toLowerCase();
-    }
-    if(name){
-      name = (name.indexOf('#') == 0)?name:'#'+name;
-      Radio.channel('channels').trigger('join', name);
-      this.ui.channelNameInput.val('');
+      this._setFormGroupValidity(false, 'channelNameInput', 'Not Connected To Server');
     }
   },
   _setFormGroupValidity(state, uiName, message = ''){
