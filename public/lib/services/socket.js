@@ -34,15 +34,12 @@ socketChannel.on('connect', function(options){
     socket.addEventListener('message', function(event) {
         var messageModel = new MessageModel({raw:event.data});
         var message = messageModel.parse();
-        
         Radio.channel('messages').trigger('receive', messageModel);
-
 console.log('message command: '+messageModel.get('command'));
 console.log(message);
 console.log(event.data);
     });
-
-    Radio.channel('navbar').trigger('connected');
+    Radio.channel('socket').trigger('connected');
   } else {
       //show 'No socket' invalid message
   }
@@ -52,6 +49,7 @@ socketChannel.on('disconnect', function(){
   if(socket && socket.readyState == socket.OPEN){
     socket.close();
   }
+  Radio.channel('socket').trigger('disconnected');
 });
 	
 socketChannel.on('send', function(messageModel){

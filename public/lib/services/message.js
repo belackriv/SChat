@@ -118,6 +118,21 @@ const MessageService = Service.extend({
       case 'RPL_BANLIST':
         Radio.channel('channels').trigger('bans',messageModel);
         break;
+      case 'RPL_AWAY':
+        Radio.channel('users').trigger('away', messageModel);
+        break;
+      case 'RPL_NOWAWAY':
+        Radio.channel('navbar').trigger('setIsAway', true);
+        this._addMessage(messageModel);
+        messageModel.set('channel', Radio.channel('channels').request('getActiveChannelName'));
+        this._addMessage(messageModel);
+        break;
+      case 'RPL_UNAWAY':
+        Radio.channel('navbar').trigger('setIsAway', false);        
+        this._addMessage(messageModel);
+        messageModel.set('channel', Radio.channel('channels').request('getActiveChannelName'));
+        this._addMessage(messageModel);
+        break;
       case 'ERR_BADCHANNELKEY':
         Radio.channel('navbar').trigger('invalid','channelNameInput', 'Bad Channel Key');
         var channelModel =  Radio.channel('channels').request('getChannelModel', messageModel.get('channel'));

@@ -16,6 +16,7 @@ export default Backbone.Model.extend({
     roleName: null,
     roles: null,
     host: null,
+    isAway: false
   },
   idAttribute: 'nick',
   parse(messageModel){
@@ -49,11 +50,15 @@ export default Backbone.Model.extend({
     }
   },
   parseMode(mode){
-    var methodName = 'demote';
-    if(mode.get('isSet')){
-      methodName = 'promote';
+    if(mode.get('flag') == 'a'){
+      this.set('isAway', mode.get('isSet'));
+    }else{
+      var methodName = 'demote';
+      if(mode.get('isSet')){
+        methodName = 'promote';
+      }
+      this[methodName](mode.get('flag'));
     }
-    this[methodName](mode.get('flag'));
   },
   promote(role){
     this.addRole(role);

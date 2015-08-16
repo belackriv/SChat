@@ -1,6 +1,14 @@
 export default
 [
 	{
+		label: 'Away',
+		eventName: 'away',
+		type: 'mode',
+		flag:  'a',
+		roles: [],
+		scopes: ['userFlag']
+	},
+	{
 		label: 'Who Is?',
 		eventName: 'whois',
 		flag:  null,

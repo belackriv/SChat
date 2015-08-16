@@ -56,7 +56,7 @@ ModeModel.parseModes = function(message){
       definedMode = _.findWhere(modesDefine,{flag: mode.flag}); 
     }
     if(typeof definedMode === 'undefined'){
-      throw 'MODE '+mode.flag+' not found!';
+      throw 'MODE "'+mode.flag+'" not found!';
     }
     var modeModel = new ModeModel(definedMode);
     modeModel.set('isSet', mode.isSet);

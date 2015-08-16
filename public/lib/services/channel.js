@@ -20,10 +20,10 @@ const ChannelService = Service.extend({
     //this.server = "ws://localhost:8080";
   },
   start(){
+    Radio.channel('socket').on('connected',this._connected.bind(this));
+    Radio.channel('socket').on('disconnected',this._disconnected.bind(this));
     Radio.channel('channels').on('change:topic',this._changedTopic.bind(this));
     Radio.channel('channels').on('activate',this._activateChannel.bind(this));
-    Radio.channel('channels').on('connect',this._connect.bind(this));
-    Radio.channel('channels').on('disconnect',this._disconnect.bind(this));
     Radio.channel('channels').on('join',this._joinChannel.bind(this));
     Radio.channel('channels').on('key:invalid',this._invalidChannelKey.bind(this));
     Radio.channel('channels').on('part',this._partChannel.bind(this));
@@ -40,33 +40,17 @@ const ChannelService = Service.extend({
     Radio.channel('channels').reply('getActiveChannelName', 'server');
     Radio.channel('channels').reply('getChannelModel', this._getChannelModel.bind(this));
   },
-  _connect(callback){
-    if(!this._connected){
-      Radio.channel('socket').trigger('connect', {
-        server: this.server,
-        nick: Radio.channel('users').request('getMyNick')
-      });
-      this._joinChannel('server');
-      this._connected = true;
-      Radio.channel('channels').reply('isConnected', true);
-      if(typeof callback ==='function'){
-        callback();
-      }
-    }
+  _connected(){
+    this._joinChannel('server');
+    this._connected = true;
+    Radio.channel('channels').reply('isConnected', true);
   },
-  _disconnect(callback){
-    if(this._connected){
-      Radio.channel('channels').reply('isConnected', false);
-      this._connected = false; 
-      this._activeChannel.set('topic', 'Disconnected');
-      this._partChannel(this.collection.findWhere({name:'server'}));
-      Radio.channel('socket').trigger('disconnect');
-      Radio.channel('users').trigger('disconnect');
-      this.collection.reset();
-      if(typeof callback ==='function'){
-        callback();
-      }
-    }
+ 
+  _disconnected(){
+    Radio.channel('channels').reply('isConnected', false);
+    this._connected = false; 
+    this._activeChannel.set('topic', 'Disconnected');
+    this.collection.reset();
   },
   _joinChannel(name, doNotActivate, channelKey){
     if(this.collection.where({name:name}).length < 1){

@@ -476,7 +476,12 @@ export default Backbone.Model.extend({
     if(message.parsed && typeof message.parsed.nick === 'string'){
       return message.parsed.nick.replace(/(\r\n|\n|\r)/gm, '');
     }else{
-      return '';
+      switch(this.get('command')){
+        case 'RPL_AWAY':
+          return message.params[1].replace(/(\r\n|\n|\r)/gm, '');
+        default:
+          return '';
+      }
     }
   },
   _parseChannel(message){
@@ -518,17 +523,35 @@ export default Backbone.Model.extend({
       case 'MODE':
       case 'RPL_CHANNELMODEIS':
         this.set('modes', ModeModel.parseModes(message));
+        var isAwayMode = false;
         var modesStr = '';
         var params = [];
         for(let modeModel of this.get('modes')){
-          modesStr += modeModel.get('isSet')?'+':'-';
-          modesStr += modeModel.get('flag');
-          if(modeModel.get('param')){
-            params.push(modeModel.get('param'));
+          if(modeModel.get('flag')=='a'){
+            isAwayMode = modeModel;
+          }else{
+            modesStr += modeModel.get('isSet')?'+':'-';
+            modesStr += modeModel.get('flag');
+            if(modeModel.get('param')){
+              params.push(modeModel.get('param'));
+            }
           }
         }
         var content =  ' * '+this.get('nick')+' sets mode for '+this.get('channel')+' '+modesStr+' '+params.join(' ');
+        if(isAwayMode){
+          if(isAwayMode.get('isSet')){
+            content = ' * '+this.get('nick')+' is away.';
+          }else{
+            content = ' * '+this.get('nick')+' is back.';
+          }
+        }
         return content;
+      case 'RPL_AWAY':
+        return ' * '+this.get('nick')+' is away.';
+      case 'RPL_NOWAWAY':
+        return ' * You are now marked as away.';
+      case 'RPL_UNAWAY':
+        return ' * You are no longer marked as away.';
       case 'RPL_BANLIST':
         var mode = new ModeModel({
           flag: 'b',
@@ -578,6 +601,9 @@ export default Backbone.Model.extend({
    //generates a raw command to send from the model properties
   toString(){
     switch(this.get('command')){
+      case 'AWAY':
+        var awayStr = (this.get('message'))?':'+this.get('message'):'';
+        return 'AWAY '+awayStr;
       case 'JOIN':
         var keyStr = '';
         if(this.get('key')){

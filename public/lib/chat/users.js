@@ -22,14 +22,22 @@ var UserChildView = Marionette.ItemView.extend({
     'change': 'render'
   },
   onRender(){
-    this._renderUserActive();
+    this._renderUserSelected();
+    this._renderUserAway();
     this._renderUserRoleBackground();
   },
-  _renderUserActive(){
-    if(this.model.get('isActive')){
+  _renderUserSelected(){
+    if(this.model.get('isSelected')){
       this.$el.addClass('active');
     }else{
       this.$el.removeClass('active');
+    }
+  },
+  _renderUserAway(){
+    if(this.model.get('isAway')){
+      this.$el.addClass('schat-user-is-away');
+    }else{
+      this.$el.removeClass('schat-user-is-away');
     }
   },
   _renderUserRoleBackground(){
@@ -40,8 +48,8 @@ var UserChildView = Marionette.ItemView.extend({
     }
   },
   _handleClick(event){
-    this.model.set('isActive', true);
-    this.triggerMethod('activate');
+    this.model.set('isSelected', true);
+    this.triggerMethod('select');
   },
   _handleContextMenu(event){
     event.preventDefault();
@@ -83,10 +91,10 @@ export default Marionette.LayoutView.extend({
       collection: this.collection
     }));
   },
-  onChildviewActivate(childView){
+  onChildviewSelect(childView){
     this.collection.each((model)=>{
       if(model != childView.model){
-        model.set('isActive', false);
+        model.set('isSelected', false);
       }
     });
   },
