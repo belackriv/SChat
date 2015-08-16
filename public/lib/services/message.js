@@ -49,7 +49,7 @@ const MessageService = Service.extend({
       case 'JOIN':
         Radio.channel('users').trigger('join',messageModel);
         if(messageModel.get('nick') != Radio.channel('users').request('getMyNick')){
-          this._addMessage(messageModel);  
+          this._addMessage(messageModel);
         }
         break;
       case 'PART':
@@ -86,7 +86,7 @@ const MessageService = Service.extend({
           displayedMessage.set('channel', 'server');
         }
         this._addMessage(displayedMessage);
-        break;     
+        break;
       case 'TOPIC':
       case 'RPL_TOPIC':
       case 'RPL_NOTOPIC':
@@ -98,6 +98,9 @@ const MessageService = Service.extend({
         break;
       case 'RPL_NAMREPLY':
         Radio.channel('users').trigger('receive',messageModel);
+        break;
+      case 'RPL_WHOREPLY':
+        Radio.channel('users').trigger('who',messageModel);
         break;
       case 'RPL_WHOISUSER':
         if(!Radio.channel('users').request('isBanPending', messageModel) ){
@@ -129,7 +132,7 @@ const MessageService = Service.extend({
         this._addMessage(messageModel);
         break;
       case 'RPL_UNAWAY':
-        Radio.channel('navbar').trigger('setIsAway', false);        
+        Radio.channel('navbar').trigger('setIsAway', false);
         this._addMessage(messageModel);
         messageModel.set('channel', Radio.channel('channels').request('getActiveChannelName'));
         this._addMessage(messageModel);
@@ -137,7 +140,7 @@ const MessageService = Service.extend({
       case 'RPL_WELCOME':
         Radio.channel('socket').trigger('connected');
         this._addMessage(messageModel);
-        break;      
+        break;
       case 'ERR_BADCHANNELKEY':
         Radio.channel('navbar').trigger('invalid','channelNameInput', 'Bad Channel Key');
         var channelModel =  Radio.channel('channels').request('getChannelModel', messageModel.get('channel'));

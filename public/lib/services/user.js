@@ -29,13 +29,37 @@ const UserService = Service.extend({
     Radio.channel('users').on('ban',this._ban.bind(this));
     Radio.channel('users').on('nick',this._nick.bind(this));
     Radio.channel('users').on('away',this._away.bind(this));
+    Radio.channel('users').on('who',this._who.bind(this));
     Radio.channel('users').on('changeMyNick',this._changeMyNick.bind(this));
     Radio.channel('users').reply('getMyNick', this.myNick);
     Radio.channel('users').reply('getChannelUsers', this._getUserCollection.bind(this));
     Radio.channel('users').reply('isUserInChannel', this._isUserInChannel.bind(this));
     Radio.channel('users').reply('isBanPending', this._isBanPending.bind(this));
     Radio.channel('users').reply('getMyUserModelForChannel', this._getMyUserModelForChannel.bind(this));
+    Radio.channel('socket').on('connected',this._connected.bind(this));
     Radio.channel('socket').on('disconnected',this._disconnected.bind(this));
+
+  },
+  _connected(){
+    this._intervalId = setInterval(this._refreshUsers.bind(this), 30000);
+  },
+  _refreshUsers(){
+    for(let channelName in this._channelUsers){
+      if(channelName !== 'server'){
+        var messageModel = new MessageModel({
+          command: 'WHO',
+          channel: channelName
+        });
+        Radio.channel('messages').trigger('send', messageModel);
+      }
+    }
+  },
+  _disconnected(){
+    _.each(this._channelUsers, (collection, key, obj)=>{
+      collection.reset();
+      delete obj[key];
+    });
+    clearInterval(this._intervalId);
   },
   _receive(messageModel){
     var service = this;
@@ -47,7 +71,7 @@ const UserService = Service.extend({
       userModel.parse();
       var currentUserModel = userCollection.get(userModel.get('nick'));
       if( !currentUserModel ){
-        userCollection.add(userModel);  
+        userCollection.add(userModel);
       }else{
         currentUserModel.set(userModel.toJSON());
       }
@@ -59,7 +83,7 @@ const UserService = Service.extend({
     if( !userCollection.get(messageModel.get('nick')) ){
       var userModel =  new UserModel();
       userModel.parse(messageModel);
-      userCollection.add(userModel);  
+      userCollection.add(userModel);
     }
   },
   _part(messageModel){
@@ -81,12 +105,6 @@ const UserService = Service.extend({
       }
     });
   },
-  _disconnected(){
-    _.each(this._channelUsers, (collection, key, obj)=>{
-      collection.reset();
-      delete obj[key];
-    });
-  },
   _mode(messageModel){
     var channelName = messageModel.get('channel');
     for(let modeModel of messageModel.get('modes')){
@@ -105,7 +123,7 @@ const UserService = Service.extend({
             userModel.parseMode(modeModel);
           }
         }
-      }  
+      }
     }
   },
   _nick(messageModel){
@@ -215,7 +233,7 @@ const UserService = Service.extend({
     };
     Radio.channel('dialog').on('submit', kickUser);
     Radio.channel('dialog').once('close', ()=>{
-      Radio.channel('dialog').off('submit', kickUser);  
+      Radio.channel('dialog').off('submit', kickUser);
     });
     Radio.channel('dialog').trigger('open', new KickView() );
   },
@@ -252,6 +270,15 @@ const UserService = Service.extend({
       userCollection.reset();
     }else if(userModel){
       userCollection.remove(userModel);
+    }
+  },
+  _who(messageModel){
+    if(messageModel.get('channel') !== '*'){
+      if(messageModel.get('userMode').indexOf('H') > -1){
+        this._getUserModelForChannel(messageModel.get('channel'), messageModel.get('nick')).set('isAway', false);
+      }else{
+        this._getUserModelForChannel(messageModel.get('channel'), messageModel.get('nick')).set('isAway', true);
+      }
     }
   },
   _getUserCollection(channelName){

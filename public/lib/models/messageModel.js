@@ -479,6 +479,8 @@ export default Backbone.Model.extend({
       switch(this.get('command')){
         case 'RPL_AWAY':
           return message.params[1].replace(/(\r\n|\n|\r)/gm, '');
+        case 'RPL_WHOREPLY':
+          return message.params[5].replace(/(\r\n|\n|\r)/gm, '');
         default:
           return '';
       }
@@ -499,6 +501,7 @@ export default Backbone.Model.extend({
       case 'RPL_TOPIC':
       case 'RPL_NOTOPIC':
       case 'RPL_CHANNELMODEIS':
+      case 'RPL_WHOREPLY':
       case 'RPL_BANLIST':
       case 'ERR_CANNOTSENDTOCHAN':
       case 'ERR_BADCHANNELKEY':
@@ -552,6 +555,9 @@ export default Backbone.Model.extend({
         return ' * You are now marked as away.';
       case 'RPL_UNAWAY':
         return ' * You are no longer marked as away.';
+      case 'RPL_WHOREPLY':
+        this.set('userMode', message.params[6].replace(/(\r\n|\n|\r)/gm, ''))
+        return this.get('command') +' : '+ message.params.join(' ');
       case 'RPL_BANLIST':
         var mode = new ModeModel({
           flag: 'b',
@@ -615,7 +621,7 @@ export default Backbone.Model.extend({
       case 'PART':
         return 'PART '+this.get('channel');
       case 'PONG':
-        return 'PONG '+this.get('extra');        
+        return 'PONG '+this.get('extra');
       case 'PRIVMSG':
         return 'PRIVMSG '+this.get('channel')+' :'+this.get('content');
         break;
@@ -624,7 +630,7 @@ export default Backbone.Model.extend({
       case 'USER':
         return 'USER '+this.get('extra');
       case 'RAW':
-        return this.get('content');     
+        return this.get('content');
       case 'TOPIC':
         return 'TOPIC '+this.get('channel')+' :'+this.get('content');
       case 'WHOIS':
@@ -646,7 +652,7 @@ export default Backbone.Model.extend({
             if(modeModel.get('isSet') && modeModel.get('paramName')){
               params.push(modeModel.get('param'));
             }else if(modeModel.get('isParamAlwaysRequired')){
-              params.push(modeModel.get('param')); 
+              params.push(modeModel.get('param'));
             }
           }
         }
@@ -663,6 +669,8 @@ export default Backbone.Model.extend({
         return 'MODE '+this.get('channel')+' '+modesStr+' '+params.join(' ');
       case 'KICK':
         return 'KICK '+this.get('channel')+' '+this.get('extra')+' '+this.get('content');
+      case 'WHO':
+        return 'WHO '+this.get('channel');
       default:
         return '';
         break;
