@@ -41,16 +41,23 @@ const ChannelService = Service.extend({
     Radio.channel('channels').reply('getChannelModel', this._getChannelModel.bind(this));
   },
   _connected(){
-    this._joinChannel('server');
+    if(this.collection.where({name:'server'}).length < 1){
+      this._joinChannel('server');
+    }
     this._connected = true;
     Radio.channel('channels').reply('isConnected', true);
+    this.collection.get('server').set('topic', 'Connected');
+    this.collection.each((channelModel)=>{
+      if(channelModel.get('name') != 'server'){
+        Radio.channel('messages').trigger('join:channel', channelModel);
+      }
+    });
   },
  
   _disconnected(){
-    Radio.channel('channels').reply('isConnected', false);
     this._connected = false; 
-    this._activeChannel.set('topic', 'Disconnected');
-    this.collection.reset();
+    Radio.channel('channels').reply('isConnected', false);
+    this.collection.get('server').set('topic', 'Disconnected');
   },
   _joinChannel(name, doNotActivate, channelKey){
     if(this.collection.where({name:name}).length < 1){

@@ -28,7 +28,7 @@ socketChannel.on('connect', function(options){
     });
 
     socket.addEventListener('close', function(event) {
-        Radio.channel('channels').trigger('disconnect');
+        Radio.channel('socket').trigger('disconnected');
     });
 
     socket.addEventListener('message', function(event) {
@@ -39,7 +39,6 @@ console.log('message command: '+messageModel.get('command'));
 console.log(message);
 console.log(event.data);
     });
-    Radio.channel('socket').trigger('connected');
   } else {
       //show 'No socket' invalid message
   }
@@ -49,7 +48,6 @@ socketChannel.on('disconnect', function(){
   if(socket && socket.readyState == socket.OPEN){
     socket.close();
   }
-  Radio.channel('socket').trigger('disconnected');
 });
 	
 socketChannel.on('send', function(messageModel){

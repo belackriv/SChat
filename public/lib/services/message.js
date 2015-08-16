@@ -20,6 +20,7 @@ const MessageService = Service.extend({
     this.channelCollection.on('add',this._addChannel.bind(this));
     this.channelCollection.on('remove',this._removeChannel.bind(this));
     this.channelCollection.on('reset',this._resetChannels.bind(this));
+    Radio.channel('messages').on('join:channel',this._addChannel.bind(this));
     Radio.channel('channels').on('activate',this._activateChannel.bind(this));
   },
   _receive(messageModel){
@@ -133,6 +134,10 @@ const MessageService = Service.extend({
         messageModel.set('channel', Radio.channel('channels').request('getActiveChannelName'));
         this._addMessage(messageModel);
         break;
+      case 'RPL_WELCOME':
+        Radio.channel('socket').trigger('connected');
+        this._addMessage(messageModel);
+        break;      
       case 'ERR_BADCHANNELKEY':
         Radio.channel('navbar').trigger('invalid','channelNameInput', 'Bad Channel Key');
         var channelModel =  Radio.channel('channels').request('getChannelModel', messageModel.get('channel'));
@@ -161,6 +166,9 @@ const MessageService = Service.extend({
           this._removeChannel(channelModel);
         }
         this._addMessage(messageModel);
+      case 'ERROR':
+        this._addMessage(messageModel);
+        Radio.channel('socket').trigger('disconnect');
       default:
         this._addMessage(messageModel);
         break;
@@ -179,25 +187,27 @@ const MessageService = Service.extend({
   },
   _addChannel(channelModel){
     var channelName = channelModel.get('name');
-    var messageCollection = this._getMessageCollection(channelName);
-    var joinMessageModel = new MessageModel({
-      channel: channelName,
-      command: 'JOIN',
-      content: ' * Now Talking in '+channelName,
-      timestamp: new Date()
-    });
-    if(channelModel.get('key')){
-      joinMessageModel.set('key',channelModel.get('key'));
+    if(channelName !== 'server'){
+      var messageCollection = this._getMessageCollection(channelName);
+      var joinMessageModel = new MessageModel({
+        channel: channelName,
+        command: 'JOIN',
+        content: ' * Now Talking in '+channelName,
+        timestamp: new Date()
+      });
+      if(channelModel.get('key')){
+        joinMessageModel.set('key',channelModel.get('key'));
+      }
+      var modeMessageModel = new MessageModel({
+        channel: channelName,
+        command: 'MODE',
+      });
+      if(channelModel.get('silent') !== true){
+        Radio.channel('socket').trigger('send', joinMessageModel);
+        Radio.channel('socket').trigger('send', modeMessageModel);
+      }
+      this._addMessage(joinMessageModel);
     }
-    var modeMessageModel = new MessageModel({
-      channel: channelName,
-      command: 'MODE',
-    });
-    if(channelModel.get('silent') !== true){
-      Radio.channel('socket').trigger('send', joinMessageModel);
-      Radio.channel('socket').trigger('send', modeMessageModel);
-    }
-    this._addMessage(joinMessageModel);
   },
   _removeChannel(channelModel){
     var channelName = channelModel.get('name');
