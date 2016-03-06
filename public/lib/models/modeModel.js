@@ -2,7 +2,7 @@
 
 import _ from 'underscore';
 import Backbone from 'backbone';
-import modesDefine from './modesDefine';
+import modesDefine from './modesDefine.js';
 
 var ModeModel =  Backbone.Model.extend({
   initialize(){
@@ -53,7 +53,7 @@ ModeModel.parseModes = function(message){
     }
     var definedMode = _.findWhere(modesDefine,mode);
     if(typeof definedMode === 'undefined'){
-      definedMode = _.findWhere(modesDefine,{flag: mode.flag}); 
+      definedMode = _.findWhere(modesDefine,{flag: mode.flag});
     }
     if(typeof definedMode === 'undefined'){
       throw 'MODE "'+mode.flag+'" not found!';

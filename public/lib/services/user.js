@@ -4,11 +4,11 @@ import _ from 'underscore';
 import Backbone from 'backbone';
 import Service from 'backbone.service';
 import Radio from 'backbone.radio';
-import MessageModel from 'lib/models/messageModel';
-import ModeModel from 'lib/models/modeModel';
-import UserCollection from 'lib/models/userCollection';
-import UserModel from 'lib/models/userModel';
-import KickView from 'lib/chat/kick';
+import MessageModel from 'lib/models/messageModel.js';
+import ModeModel from 'lib/models/modeModel.js';
+import UserCollection from 'lib/models/userCollection.js';
+import UserModel from 'lib/models/userModel.js';
+import KickView from 'lib/chat/kick.js';
 
 
 const UserService = Service.extend({

@@ -3,8 +3,8 @@
 import Radio from 'backbone.radio';
 import Marionette from 'marionette';
 import template from './template.hbs!';
-import MessageModel from 'lib/models/messageModel';
-import AwayMessageView from './awayMessage';
+import MessageModel from 'lib/models/messageModel.js';
+import AwayMessageView from './awayMessage.js';
 
 export default Marionette.ItemView.extend({
   initialize(){
@@ -119,7 +119,7 @@ export default Marionette.ItemView.extend({
         };
         Radio.channel('dialog').on('submit', setAway);
         Radio.channel('dialog').once('close', ()=>{
-          Radio.channel('dialog').off('submit', setAway);  
+          Radio.channel('dialog').off('submit', setAway);
         });
         Radio.channel('dialog').trigger('open', new AwayMessageView() );
       }

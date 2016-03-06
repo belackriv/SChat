@@ -1,9 +1,9 @@
 'use strict';
 
 import Backbone from 'backbone';
-import ModeCollection from './modeCollection';
-import BanMaskCollection from './banMaskCollection';
-import modes from './modes';
+import ModeCollection from './modeCollection.js';
+import BanMaskCollection from './banMaskCollection.js';
+import modes from './modes.js';
 
 export default Backbone.Model.extend({
   initialize(){
@@ -52,7 +52,7 @@ export default Backbone.Model.extend({
         if(!bans.get(mode.get('param'))){
            bans.add({mask: mode.get('param')});
         }
-      }else{  
+      }else{
         bans.remove(mode.get('param'));
       }
     }else{

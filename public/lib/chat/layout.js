@@ -3,9 +3,9 @@
 import Radio from 'backbone.radio';
 import Marionette from 'marionette';
 import layoutTpl from './layout.hbs!';
-import TabsView from './tabs';
-import UsersView from './users';
-import ChatView from './chat';
+import TabsView from './tabs.js';
+import UsersView from './users.js';
+import ChatView from './chat.js';
 
 
 export default Marionette.LayoutView.extend({

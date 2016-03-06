@@ -3,7 +3,7 @@
 //import io from 'javascripts/socket.io';
 import _ from 'underscore';
 import Radio from 'backbone.radio';
-import MessageModel from 'lib/models/messageModel';
+import MessageModel from 'lib/models/messageModel.js';
 
 
 var socket = null;
@@ -19,7 +19,7 @@ socketChannel.on('connect', function(options){
 
   if (window['WebSocket']) {
     socket = new WebSocket(options.server);
-    
+
     socket.addEventListener('open', function(event) {
       var userReply = new MessageModel({command: 'USER', extra: options.user+' user dazed.ef.net :WebChat User'});
       socketChannel.trigger('send',userReply);
@@ -49,7 +49,7 @@ socketChannel.on('disconnect', function(){
     socket.close();
   }
 });
-	
+
 socketChannel.on('send', function(messageModel){
   if(socket && socket.readyState == socket.OPEN){
     socket.send(messageModel.toString());

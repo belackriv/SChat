@@ -4,9 +4,9 @@ import _ from 'underscore';
 import Backbone from 'backbone';
 import Service from 'backbone.service';
 import Radio from 'backbone.radio';
-import UserCollection from 'lib/models/userCollection';
-import MessageCollection from 'lib/models/messageCollection';
-import MessageModel from 'lib/models/messageModel';
+import UserCollection from 'lib/models/userCollection.js';
+import MessageCollection from 'lib/models/messageCollection.js';
+import MessageModel from 'lib/models/messageModel.js';
 
 const MessageBufferSize = 100;
 

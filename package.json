@@ -23,7 +23,7 @@
     "babel-eslint": "^4.0.5",
     "eslint": "^1.0.0",
     "jasmine-core": "^2.3.4",
-    "jspm": "^0.15.7",
+    "jspm": "^0.17.0-beta.9",
     "karma": "^0.12.37",
     "karma-chrome-launcher": "^0.2.0",
     "karma-jasmine": "^0.3.5",
@@ -35,7 +35,7 @@
       "baseURL": "public"
     },
     "dependencies": {
-      "backbone": "npm:backbone@^1.2.1",
+      "backbone": "npm:backbone@^1.3.1",
       "backbone-metal": "github:marionettejs/backbone-metal@^0.5.0",
       "backbone-metal-classify": "github:thejameskyle/backbone-metal-classify@^1.0.1",
       "backbone-normalize-hash": "github:thejameskyle/backbone-normalize-hash@^1.0.0",
@@ -43,10 +43,10 @@
       "backbone.radio": "github:marionettejs/backbone.radio@^1.0.0",
       "backbone.service": "github:thejameskyle/backbone.service@^0.5.1",
       "backbone.wreqr": "github:marionettejs/backbone.wreqr@^1.3.3",
-      "bootstrap": "github:twbs/bootstrap@^3.3.5",
+      "bootstrap": "github:twbs/bootstrap@^3.3.6",
       "css": "github:systemjs/plugin-css@^0.1.13",
       "es6-promise": "npm:es6-promise-polyfill@^1.0.0",
-      "handlebars": "github:components/handlebars.js@^3.0.3",
+      "handlebars": "github:components/handlebars.js@^4.0.0",
       "hbs": "github:davis/plugin-hbs@master",
       "jquery": "github:components/jquery@^2.1.4",
       "jquery-ui": "github:components/jqueryui@^1.11.4",
@@ -55,9 +55,77 @@
       "underscore": "npm:underscore@^1.8.3"
     },
     "devDependencies": {
-      "babel": "npm:babel-core@^5.1.13",
-      "babel-runtime": "npm:babel-runtime@^5.1.13",
-      "core-js": "npm:core-js@^0.9.4"
+      "babel-runtime": "npm:babel-runtime@^5.8.24"
+    },
+    "peerDependencies": {
+      "core-js": "npm:core-js@^1.1.4",
+      "fs": "github:jspm/nodelibs-fs@^0.2.0-alpha",
+      "path": "github:jspm/nodelibs-path@^0.2.0-alpha",
+      "process": "github:jspm/nodelibs-process@^0.2.0-alpha"
+    },
+    "overrides": {
+      "github:components/jquery@2.2.1": {
+        "main": "jquery"
+      },
+      "github:components/jqueryui@1.11.4": {
+        "main": "jquery-ui.js",
+        "registry": "jspm",
+        "dependencies": {
+          "jquery": "*"
+        }
+      },
+      "github:moment/moment@2.11.2": {
+        "main": "moment",
+        "format": "global",
+        "meta": {
+          "locale/*.js": {
+            "deps": [
+              "../moment"
+            ],
+            "format": "global"
+          }
+        }
+      },
+      "github:twbs/bootstrap@3.3.6": {
+        "shim": {
+          "js/bootstrap": [
+            "jquery"
+          ]
+        },
+        "dependencies": {
+          "jquery": "github:components/jquery"
+        },
+        "files": [
+          "dist",
+          "fonts",
+          "js",
+          "css",
+          "less",
+          "grunt",
+          "LICENSE"
+        ],
+        "systemjs": {
+          "main": "dist/js/bootstrap.js",
+          "modules": {
+            "dist/js/bootstrap.js": {
+              "deps": [
+                "jquery"
+              ],
+              "exports": "$"
+            }
+          }
+        }
+      },
+      "npm:babel-runtime@5.8.35": {
+        "main": false,
+        "dependencies": {},
+        "optionalDependencies": {
+          "core-js": "^1.2.0"
+        }
+      },
+      "npm:jquery@2.2.1": {
+        "format": "amd"
+      }
     }
   }
 }

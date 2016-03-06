@@ -5,10 +5,10 @@ import Backbone from 'backbone';
 import Marionette from 'marionette';
 import usersTemplate from './users.hbs!';
 import userTemplate from './user.hbs!';
-import ModeCollection from 'lib/models/modeCollection';
-import modes from 'lib/models/modes';
+import ModeCollection from 'lib/models/modeCollection.js';
+import modes from 'lib/models/modes.js';
 import Radio from 'backbone.radio';
-import ContextMenu from './contextMenu';
+import ContextMenu from './contextMenu.js';
 
 var UserChildView = Marionette.ItemView.extend({
   template: userTemplate,

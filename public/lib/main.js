@@ -2,14 +2,16 @@
 
 import 'backbone';
 import 'jquery';
+import 'jquery-ui/themes/ui-lightness/jquery-ui.min.css!';
 import 'jquery-ui';
+import 'bootstrap/css/bootstrap.min.css!';
 import 'bootstrap';
 import './handlebarsHelpers';
-import App from './app';
-import socketService from './services/socket';
-import channelService from './services/channel';
-import userService from './services/user';
-import messageService from './services/message';
+import App from './app.js';
+import socketService from './services/socket.js';
+import channelService from './services/channel.js';
+import userService from './services/user.js';
+import messageService from './services/message.js';
 
 channelService.setup();
 channelService.start();

@@ -3,10 +3,10 @@
 import Backbone from 'backbone';
 import Radio from 'backbone.radio';
 import Marionette from 'marionette';
-import './shims/marionette.radio.shim';
-import AppLayout from './app_layout_view';
-import NavbarView from './navbar/view';
-import ChatLayout from './chat/layout';
+import './shims/marionette.radio.shim.js';
+import AppLayout from './app_layout_view.js';
+import NavbarView from './navbar/view.js';
+import ChatLayout from './chat/layout.js';
 
 if (window.__agent) {
   window.__agent.start(Backbone, Marionette);

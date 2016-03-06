@@ -3,15 +3,15 @@
 import Backbone from 'backbone';
 import Marionette from 'marionette';
 import Radio from 'backbone.radio';
-import MessageModel from 'lib/models/messageModel';
-import InputHistoryModel from 'lib/models/inputHistoryModel';
-import InputHistoryCollection from 'lib/models/inputHistoryCollection';
+import MessageModel from 'lib/models/messageModel.js.js';
+import InputHistoryModel from 'lib/models/inputHistoryModel.js';
+import InputHistoryCollection from 'lib/models/inputHistoryCollection.js';
 import chatTemplate from './chat.hbs!';
 import chatDefaultmsgTemplate from './chatDefaultmsg.hbs!';
 import chatPrivmsgTemplate from './chatPrivmsg.hbs!';
-import ModeCollection from 'lib/models/modeCollection';
-import modes from 'lib/models/modes';
-import ContextMenu from './contextMenu';
+import ModeCollection from 'lib/models/modeCollection.js';
+import modes from 'lib/models/modes.js';
+import ContextMenu from './contextMenu.js';
 import Handlebars from 'handlebars';
 
 var ChatMsgView = Marionette.ItemView.extend({
@@ -166,7 +166,7 @@ export default Marionette.CompositeView.extend({
             var cursorPos = this.ui.contentInput.get(0).selectionStart;
             var wordEndPos = content.indexOf(' ', cursorPos);
             wordEndPos = (wordEndPos > -1)?wordEndPos + cursorPos:content.length;
-            var wordStartPos = cursorPos;  
+            var wordStartPos = cursorPos;
             while(wordStartPos > 0){
               if(content[wordStartPos] == ' '){
                 wordStartPos++;
@@ -242,7 +242,7 @@ export default Marionette.CompositeView.extend({
               this.ui.contentInput.val(inputHistoryModel.get('value'));
             }
           }
-          break;  
+          break;
         default:
           this._resetLastTabMatch();
           this._resetInputHistoryInfo();
@@ -309,7 +309,7 @@ export default Marionette.CompositeView.extend({
     }
     if(channelIsModerated){
       var myUserModel = Radio.channel('users').request('getMyUserModelForChannel', this.model.get('name') );
-      if( myUserModel && myUserModel.get('roles').indexOf('o') == -1 && myUserModel.get('roles').indexOf('v') == -1 ){  
+      if( myUserModel && myUserModel.get('roles').indexOf('o') == -1 && myUserModel.get('roles').indexOf('v') == -1 ){
         isMessageSendingAuthorized = false;
       }
     }

@@ -2,7 +2,7 @@
 
 import Marionette from 'marionette';
 import appLayoutTpl from './app_layout.hbs!';
-import ContextMenuRegion from './contextMenuRegion'
+import ContextMenuRegion from './contextMenuRegion.js';
 import Radio from 'backbone.radio';
 
 export default Marionette.LayoutView.extend({
@@ -37,13 +37,13 @@ export default Marionette.LayoutView.extend({
       this.showChildView('dialogContent', view);
       this.ui.dialog.one('shown.bs.modal', ()=>{
         view.triggerMethod('modal:shown');
-        this._dialogShown = true;  
+        this._dialogShown = true;
       });
       this.ui.dialog.modal('show');
     };
     if(this._dialogShown){
       this.ui.dialog.one('hidden.bs.modal', ()=>{
-        showDialog();  
+        showDialog();
       });
     }else{
       showDialog();

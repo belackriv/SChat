@@ -2,7 +2,7 @@
 
 import Marionette from 'marionette';
 import Radio from 'backbone.radio';
-import ContextMenuItem from './contextMenuItem';
+import ContextMenuItem from './contextMenuItem.js';
 
 export default Marionette.CollectionView.extend({
 	childView: ContextMenuItem,

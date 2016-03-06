@@ -3,10 +3,10 @@
 import _ from 'underscore';
 import Marionette from 'marionette';
 import channelInfoTemplate from './channelInfo.hbs!';
-import ChannelModesView from './channelModes';
-import ModeCollection from 'lib/models/modeCollection';
-import ChannelBansView from './channelBans';
-import BanMaskCollection from 'lib/models/banMaskCollection';
+import ChannelModesView from './channelModes.js';
+import ModeCollection from 'lib/models/modeCollection.js';
+import ChannelBansView from './channelBans.js';
+import BanMaskCollection from 'lib/models/banMaskCollection.js';
 
 import Radio from 'backbone.radio';
 
@@ -55,7 +55,7 @@ export default Marionette.LayoutView.extend({
 							if(channelMode.get('isSet')){
 								if(paramValue){
 									channelMode.set('param', paramValue, {silent: true});
-									isChanged = true;	
+									isChanged = true;
 								}
 							}else{
 								channelMode.set('param', null );

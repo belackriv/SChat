@@ -4,14 +4,14 @@ import _ from 'underscore';
 import Backbone from 'backbone';
 import Service from 'backbone.service';
 import Radio from 'backbone.radio';
-import MessageModel from 'lib/models/messageModel';
-import ChannelCollection from 'lib/models/channelCollection';
-import ChannelModel from 'lib/models/channelModel';
-import ChannelInfoView from 'lib/chat/channelInfo';
-import ModeModel from 'lib/models/modeModel';
-import modes from 'lib/models/modes';
-import BanMaskModel from 'lib/models/banMaskModel';
-import ChannelKeyView from 'lib/chat/channelKey';
+import MessageModel from 'lib/models/messageModel.js';
+import ChannelCollection from 'lib/models/channelCollection.js';
+import ChannelModel from 'lib/models/channelModel.js';
+import ChannelInfoView from 'lib/chat/channelInfo.js';
+import ModeModel from 'lib/models/modeModel.js';
+import modes from 'lib/models/modes.js';
+import BanMaskModel from 'lib/models/banMaskModel.js';
+import ChannelKeyView from 'lib/chat/channelKey.js';
 
 const ChannelService = Service.extend({
   setup(options = {}) {
@@ -53,9 +53,9 @@ const ChannelService = Service.extend({
       }
     });
   },
- 
+
   _disconnected(){
-    this._connected = false; 
+    this._connected = false;
     Radio.channel('channels').reply('isConnected', false);
     this.collection.get('server').set('topic', 'Disconnected');
   },
@@ -83,7 +83,7 @@ const ChannelService = Service.extend({
     };
     Radio.channel('dialog').on('submit', joinChannel);
     Radio.channel('dialog').once('close', ()=>{
-      Radio.channel('dialog').off('submit', joinChannel);  
+      Radio.channel('dialog').off('submit', joinChannel);
     });
     Radio.channel('dialog').trigger('open', new ChannelKeyView() );
   },
@@ -114,7 +114,7 @@ const ChannelService = Service.extend({
   },
   _kicked(messageModel){
     var channelName = messageModel.get('channel');
-    //if it is you that is leaving the channel 
+    //if it is you that is leaving the channel
     if(messageModel.get('extra') == Radio.channel('users').request('getMyNick') ){
       var channelModel = this.collection.findWhere({name:channelName});
       channelModel.set('silent', true);
@@ -217,7 +217,7 @@ const ChannelService = Service.extend({
     };
     Radio.channel('dialog').on('submit', sendModes);
     Radio.channel('dialog').once('close', ()=>{
-      Radio.channel('dialog').off('submit', sendModes);  
+      Radio.channel('dialog').off('submit', sendModes);
     });
     Radio.channel('dialog').trigger('open', new ChannelInfoView({model: channelModel}) );
     var modesInfo = new MessageModel({

@@ -2,7 +2,7 @@
 
 import Backbone from 'backbone';
 import Moment from 'moment';
-import ModeModel from './modeModel';
+import ModeModel from './modeModel.js';
 
 const commandNumToStrLookup = {
   '001':'RPL_WELCOME',
